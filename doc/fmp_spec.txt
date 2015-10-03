@@ -1,9 +1,9 @@
 
 		TOPPERS/FMPカーネルの仕様概要
 
-		対応バージョン: Release 1.2.0
-		対応ASPカーネルバージョン : Release 1.7.0
-		最終更新: 2011年3月10日
+		対応バージョン: Release 1.3.0
+		対応ASPカーネルバージョン : Release 1.9.1
+		最終更新: 2015年1月27日
 
 このドキュメントは，TOPPERS/FMPカーネルの仕様概要について説明したもの
 である．TOPPERS/ASPカーネルに対する拡張および変更箇所を中心に説明する．
@@ -13,7 +13,7 @@
      Toyohashi Open Platform for Embedded Real-Time Systems/
      Flexible MultiProcessor Kernel
 
- Copyright (C) 2005-2010 by Embedded and Real-Time Systems Laboratory
+ Copyright (C) 2005-2015 by Embedded and Real-Time Systems Laboratory
              Graduate School of Information Science, Nagoya Univ., JAPAN
  
  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -45,7 +45,7 @@
  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  の責任を負わない．
  
- @(#) $Id: fmp_spec.txt 792 2011-03-10 14:18:33Z ertl-honda $
+ @(#) $Id: fmp_spec.txt 1087 2015-02-03 01:04:34Z ertl-honda $
 ----------------------------------------------------------------------
 
 ○前提となる文書

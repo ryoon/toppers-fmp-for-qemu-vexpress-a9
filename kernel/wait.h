@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: wait.h 661 2010-07-29 10:10:12Z ertl-honda $
+ *  @(#) $Id: wait.h 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -60,11 +60,11 @@ Inline void
 queue_insert_tpri(QUEUE *p_queue, TCB *p_tcb)
 {
 	QUEUE	*p_entry;
-	uint_t	priority = p_tcb->priority;
+	uint_t	pri = p_tcb->priority;
 
 	for (p_entry = p_queue->p_next; p_entry != p_queue;
 										p_entry = p_entry->p_next) {
-		if (priority < ((TCB *) p_entry)->priority) {
+		if (pri < ((TCB *) p_entry)->priority) {
 			break;
 		}
 	}

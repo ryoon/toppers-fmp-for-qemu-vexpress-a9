@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: kernel_int.h 378 2009-09-11 16:21:24Z ertl-honda $
+ *  @(#) $Id: kernel_int.h 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -74,5 +74,12 @@
  *  リネームしたシンボルを元に戻すためのヘッダファイル
  */
 #include "kernel_unrename.h"
+
+/*
+ *  内容が空の配列を生成するためのマクロ
+ */
+#ifndef TOPPERS_EMPTY_LABEL
+#define TOPPERS_EMPTY_LABEL(type, var)		type var[0]
+#endif /* TOPPERS_EMPTY_LABEL */
 
 #endif /* TOPPERS_KERNEL_INT_H */

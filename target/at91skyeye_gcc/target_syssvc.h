@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2005-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2005-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: target_syssvc.h 790 2011-03-03 15:40:19Z ertl-honda $
+ *  @(#) $Id: target_syssvc.h 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -70,13 +70,13 @@
  *
  *  ターゲット依存の方法で，文字cを表示/出力/保存する．
  */
-extern void	target_fput_log(char_t c);
+extern void	target_fput_log(char c);
 
 #ifdef TOPPERS_ENABLE_TRACE
 /*
  *  トレースログのファイル出力
  */
-extern void	target_fput_log_file(char_t c);
+extern void	target_fput_log_file(char c);
 #endif /* TOPPERS_ENABLE_TRACE */
 
 /*

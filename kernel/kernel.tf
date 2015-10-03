@@ -5,7 +5,7 @@ $       Toyohashi Open Platform for Embedded Real-Time Systems/
 $       Flexible MultiProcessor Kernel
 $ 
 $   Copyright (C) 2007 by TAKAGI Nobuhisa
-$   Copyright (C) 2007-2011 by Embedded and Real-Time Systems Laboratory
+$   Copyright (C) 2007-2015 by Embedded and Real-Time Systems Laboratory
 $               Graduate School of Information Science, Nagoya Univ., JAPAN
 $  
 $   上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@ $   に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
 $   アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
 $   の責任を負わない．
 $ 
-$   @(#) $Id: kernel.tf 1081 2015-01-06 06:59:00Z ertl-honda $
+$   @(#) $Id: kernel.tf 1087 2015-02-03 01:04:34Z ertl-honda $
 $  
 $ =====================================================================
 
@@ -101,10 +101,6 @@ $FILE "kernel_cfg.c"$
 /* kernel_cfg.c */$NL$
 #include "kernel/kernel_int.h"$NL$
 #include "kernel_cfg.h"$NL$
-$NL$
-#ifndef TOPPERS_EMPTY_LABEL$NL$
-#define TOPPERS_EMPTY_LABEL(x,y) x y[0]$NL$
-#endif$NL$
 $NL$
 #if TKERNEL_PRID != 0x08u$NL$
 #error The kernel does not match this configuration file.$NL$
@@ -172,6 +168,17 @@ $IF USE_EXTERNAL_ID$
 	$FOREACH id ALM.ID_LIST$
 		const ID $id$_id$SPC$=$SPC$$+id$;$NL$
 	$END$
+$END$
+
+$
+$  スタック領域の確保関数
+$
+$IF !ISFUNCTION("ALLOC_STACK")$
+$FUNCTION ALLOC_STACK$
+$	// 大きい方に丸めたサイズで確保する
+	static STK_T $ARGV[1]$[COUNT_STK_T($ARGV[2]$)];$NL$
+	$RESULT = FORMAT("ROUND_STK_T(%1%)", ARGV[2])$
+$END$
 $END$
 
 $ 
@@ -248,8 +255,9 @@ $END$
 
 $ スタック領域の生成とそれに関するエラーチェック
 $FOREACH tskid TSK.ID_LIST$
-$	// stkszが0か，ターゲット定義の最小値（TARGET_MIN_STKSZ）よりも小さい場合（E_PAR）
-	$IF TSK.STKSZ[tskid] == 0 || (TARGET_MIN_STKSZ
+$	// stkszが0以下か，ターゲット定義の最小値（TARGET_MIN_STKSZ）よりも
+$	// 小さい場合（E_PAR）
+	$IF TSK.STKSZ[tskid] <= 0 || (TARGET_MIN_STKSZ
 										 && TSK.STKSZ[tskid] < TARGET_MIN_STKSZ)$
 		$ERROR TSK.TEXT_LINE[tskid]$E_PAR: $FORMAT(_("%1% `%2%\' of `%3%\' in %4% is too small"), "stksz", TSK.STKSZ[tskid], tskid, "CRE_TSK")$$END$
 	$END$
@@ -262,14 +270,15 @@ $ 	// stkszがスタック領域のサイズとして正しくない場合（E_PAR）
 	$IF EQ(TSK.STK[tskid],"NULL")$
 		$IF ISFUNCTION("GENERATE_TSKSTK")$
 			$GENERATE_TSKSTK(tskid)$
+			$TSK.TINIB_STKSZ[tskid] = FORMAT("ROUND_STK_T(%1%)", TSK.STKSZ[tskid])$
 		$ELSE$
-			static STK_T _kernel_stack_$tskid$[COUNT_STK_T($TSK.STKSZ[tskid]$)];$NL$
+			$TSK.TINIB_STKSZ[tskid] = ALLOC_STACK(CONCAT("_kernel_stack_",
+												tskid), TSK.STKSZ[tskid])$
 		$END$
-		$TSK.TINIB_STKSZ[tskid] = FORMAT("ROUND_STK_T(%1%)", TSK.STKSZ[tskid])$
 		$TSK.TINIB_STK[tskid] = CONCAT("_kernel_stack_", tskid)$
 	$ELSE$
-		$TSK.TINIB_STKSZ[tskid] = TSK.STKSZ[tskid]$
-		$TSK.TINIB_STK[tskid] = TSK.STK[tskid]$
+		$TSK.TINIB_STKSZ[tskid] = FORMAT("(%1%)", TSK.STKSZ[tskid])$
+		$TSK.TINIB_STK[tskid] = FORMAT("(void *)(%1%)", TSK.STK[tskid])$
 	$END$
 $END$
 $NL$
@@ -419,6 +428,11 @@ $		// flgatrが（［TA_TPRI］｜［TA_WMUL］｜［TA_CLR］）でない場合（E_RSATR）
 			$ERROR FLG.TEXT_LINE[flgid]$E_RSATR: $FORMAT(_("illegal %1% `%2%\' of `%3%\' in %4%"), "flgatr", FLG.FLGATR[flgid], flgid, "CRE_FLG")$$END$
 		$END$
 
+$		// iflgptnがFLGPTNに格納できない場合（E_PAR）
+		$IF (FLG.IFLGPTN[flgid] & ~((1 << TBIT_FLGPTN) - 1)) != 0$
+			$ERROR FLG.TEXT_LINE[flgid]$E_PAR: $FORMAT(_("too large %1% `%2%\' of `%3%\' in %4%"), "iflgptn", FLG.IFLGPTN[flgid], flgid, "CRE_FLG")$$END$
+		$END$
+
 $		// イベントフラグ初期化ブロック
 		$IF EQ(+TTYPE_KLOCK, +P_KLOCK)$
 			$TAB${ ($FLG.FLGATR[flgid]$), (&(_kernel_prc$CLASS_OBJ_LOCK[FLG.CLASS[flgid]]$_pcb.obj_lock)), ($FLG.IFLGPTN[flgid]$) }
@@ -475,6 +489,11 @@ $IF LENGTH(DTQ.ID_LIST)$
 $		// dtqatrが（［TA_TPRI］）でない場合（E_RSATR）
 		$IF (DTQ.DTQATR[dtqid] & ~TA_TPRI) != 0$
 			$ERROR DTQ.TEXT_LINE[dtqid]$E_RSATR: $FORMAT(_("illegal %1% `%2%\' of `%3%\' in %4%"), "dtqatr", DTQ.DTQATR[dtqid], dtqid, "CRE_DTQ")$$END$
+		$END$
+
+$		// dtqcntが負の場合（E_PAR）
+		$IF DTQ.DTQCNT[dtqid] < 0$
+			$ERROR DTQ.TEXT_LINE[dtqid]$E_PAR: $FORMAT(_("illegal %1% `%2%\' of `%3%\' in %4%"), "dtqcnt", DTQ.DTQCNT[dtqid], dtqid, "CRE_DTQ")$$END$
 		$END$
 
 $		// dtqmbがNULLでない場合（E_NOSPT）
@@ -549,6 +568,11 @@ $IF LENGTH(PDQ.ID_LIST)$
 $		// pdqatrが（［TA_TPRI］）でない場合（E_RSATR）
 		$IF (PDQ.PDQATR[pdqid] & ~TA_TPRI) != 0$
 			$ERROR PDQ.TEXT_LINE[pdqid]$E_RSATR: $FORMAT(_("illegal %1% `%2%\' of `%3%\' in %4%"), "pdqatr", PDQ.PDQATR[pdqid], pdqid, "CRE_PDQ")$$END$
+		$END$
+
+$		// pdqcntが負の場合（E_PAR）
+		$IF PDQ.PDQCNT[pdqid] < 0$
+			$ERROR PDQ.TEXT_LINE[pdqid]$E_PAR: $FORMAT(_("illegal %1% `%2%\' of `%3%\' in %4%"), "pdqcnt", PDQ.PDQCNT[pdqid], pdqid, "CRE_PDQ")$$END$
 		$END$
 
 $		// (TMIN_DPRI <= maxdpri && maxdpri <= TMAX_DPRI)でない場合（E_PAR）
@@ -701,13 +725,13 @@ $		// mpfatrが（［TA_TPRI］）でない場合（E_RSATR）
 			$ERROR MPF.TEXT_LINE[mpfid]$E_RSATR: $FORMAT(_("illegal %1% `%2%\' of `%3%\' in %4%"), "mpfatr", MPF.MPFATR[mpfid], mpfid, "CRE_MPF")$$END$
 		$END$
 
-$		// blkcntが0の場合（E_PAR）
-		$IF MPF.BLKCNT[mpfid] == 0$
+$		// blkcntが0以下の場合（E_PAR）
+		$IF MPF.BLKCNT[mpfid] <= 0$
 			$ERROR MPF.TEXT_LINE[mpfid]$E_PAR: $FORMAT(_("illegal %1% `%2%\' of `%3%\' in %4%"), "blkcnt", MPF.BLKCNT[mpfid], mpfid, "CRE_MPF")$$END$
 		$END$
 
-$		// blkszが0の場合（E_PAR）
-		$IF MPF.BLKSZ[mpfid] == 0$
+$		// blkszが0以下の場合（E_PAR）
+		$IF MPF.BLKSZ[mpfid] <= 0$
 			$ERROR MPF.TEXT_LINE[mpfid]$E_PAR: $FORMAT(_("illegal %1% `%2%\' of `%3%\' in %4%"), "blksz", MPF.BLKSZ[mpfid], mpfid, "CRE_MPF")$$END$
 		$END$
 
@@ -737,9 +761,9 @@ $	// 固定長メモリプール初期化ブロックの生成
 	const MPFINIB _kernel_mpfinib_table[TNUM_MPFID] = {$NL$
 	$JOINEACH mpfid MPF.ID_LIST ",\n"$
 		$IF EQ(+TTYPE_KLOCK, +P_KLOCK)$
-			$TAB${ ($MPF.MPFATR[mpfid]$), (&(_kernel_prc$CLASS_OBJ_LOCK[MPF.CLASS[mpfid]]$_pcb.obj_lock)), ($MPF.BLKCNT[mpfid]$), ROUND_MPF_T($MPF.BLKSZ[mpfid]$), $IF EQ(MPF.MPF[mpfid],"NULL")$(_kernel_mpf_$mpfid$)$ELSE$($MPF.MPF[mpfid]$)$END$, (_kernel_mpfmb_$mpfid$) }
+			$TAB${ ($MPF.MPFATR[mpfid]$), (&(_kernel_prc$CLASS_OBJ_LOCK[MPF.CLASS[mpfid]]$_pcb.obj_lock)), ($MPF.BLKCNT[mpfid]$), ROUND_MPF_T($MPF.BLKSZ[mpfid]$), $IF EQ(MPF.MPF[mpfid],"NULL")$(_kernel_mpf_$mpfid$)$ELSE$(void *)($MPF.MPF[mpfid]$)$END$, (_kernel_mpfmb_$mpfid$) }
 		$ELSE$
-			$TAB${ ($MPF.MPFATR[mpfid]$), ($MPF.BLKCNT[mpfid]$), ROUND_MPF_T($MPF.BLKSZ[mpfid]$), $IF EQ(MPF.MPF[mpfid],"NULL")$(_kernel_mpf_$mpfid$)$ELSE$($MPF.MPF[mpfid]$)$END$, (_kernel_mpfmb_$mpfid$) }
+			$TAB${ ($MPF.MPFATR[mpfid]$), ($MPF.BLKCNT[mpfid]$), ROUND_MPF_T($MPF.BLKSZ[mpfid]$), $IF EQ(MPF.MPF[mpfid],"NULL")$(_kernel_mpf_$mpfid$)$ELSE$(void *)($MPF.MPF[mpfid]$)$END$, (_kernel_mpfmb_$mpfid$) }
 		$END$
 	$END$$NL$
 	};$NL$
@@ -1350,7 +1374,7 @@ $
 $  割込み管理機能のための標準的な初期化情報の生成
 $ 
 $ 割込みハンドラの初期化に必要な情報
-$IF !OMIT_INITIALIZE_INTERRUPT || ALT(USE_INHINIB_TABLE,0)$
+$IF !OMIT_INITIALIZE_INTERRUPT || ALT(USE_INTINIB_TABLE,0)$
 
 $ 割込みハンドラ数
 #define TNUM_INHNO	$LENGTH(INH.ORDER_LIST)$$NL$
@@ -1509,13 +1533,24 @@ $	// DEF_ICSがない場合のデフォルト値の設定
 	#else /* DEAULT_PRC$prcid$_ISTK */$NL$
 	$IF ISFUNCTION("GENERATE_ISTACK")$
 		$GENERATE_ISTACK(prcid)$
+		#define TOPPERS_PRC$prcid$_ISTKSZ		ROUND_STK_T(DEFAULT_PRC$prcid$_ISTKSZ)$NL$
 	$ELSE$
-		static STK_T					_kernel_prc$prcid$_istack[COUNT_STK_T(DEFAULT_PRC$prcid$_ISTKSZ)];$NL$
+		$istkname = CONCAT(CONCAT("_kernel_prc",prcid), "_istack")$
+		$default_istksz = CONCAT(CONCAT("DEFAULT_PRC",prcid), "_ISTKSZ")$
+		$istksz = ALLOC_STACK(istkname, default_istksz)$$NL$
+		#define TOPPERS_PRC$prcid$_ISTKSZ		$istksz$$NL$
 	$END$
-	#define TOPPERS_PRC$prcid$_ISTKSZ		ROUND_STK_T(DEFAULT_PRC$prcid$_ISTKSZ)$NL$
 	#define TOPPERS_PRC$prcid$_ISTK		_kernel_prc$prcid$_istack$NL$
 	#endif /* DEAULT_PRC$prcid$_ISTK */$NL$
 $ELSE$
+
+$	// istkszが0以下か，ターゲット定義の最小値（TARGET_MIN_ISTKSZ）よりも
+$	// 小さい場合（E_PAR）
+	$IF ICS.ISTKSZ[icsid] <= 0 || (TARGET_MIN_ISTKSZ
+									&& ICS.ISTKSZ[icsid] < TARGET_MIN_ISTKSZ)$
+		$ERROR ICS.TEXT_LINE[icsid]$E_PAR: $FORMAT(_("%1% `%2%\' in %3% is too small"), "istksz", ICS.ISTKSZ[icsid], "DEF_ICS")$$END$
+	$END$
+
 $ 	// istkszがスタック領域のサイズとして正しくない場合（E_PAR）
 	$IF !EQ(ICS.ISTK[icsid], "NULL") && CHECK_STKSZ_ALIGN
 							&& (ICS.ISTKSZ[icsid] & (CHECK_STKSZ_ALIGN - 1))$
@@ -1526,14 +1561,16 @@ $ 	// istkszがスタック領域のサイズとして正しくない場合（E_PAR）
 $		// スタック領域の自動割付け
 		$IF ISFUNCTION("GENERATE_ISTACK_ICS")$
 			$GENERATE_ISTACK_ICS(prcid, icsid)$
+			#define TOPPERS_PRC$prcid$_ISTKSZ		ROUND_STK_T($ICS.ISTKSZ[icsid]$)$NL$
 		$ELSE$
-			static STK_T				_kernel_prc$prcid$_istack[COUNT_STK_T($ICS.ISTKSZ[icsid]$)];$NL$
+			$istkname = CONCAT(CONCAT("_kernel_prc",prcid), "_istack")$
+			$istksz = ALLOC_STACK(istkname, ICS.ISTKSZ[icsid])$$NL$
+			#define TOPPERS_PRC$prcid$_ISTKSZ		$istksz$$NL$
 		$END$
-		#define TOPPERS_PRC$prcid$_ISTKSZ		ROUND_STK_T($ICS.ISTKSZ[icsid]$)$NL$
 		#define TOPPERS_PRC$prcid$_ISTK		_kernel_prc$prcid$_istack$NL$
 	$ELSE$
 		#define TOPPERS_PRC$prcid$_ISTKSZ		($ICS.ISTKSZ[icsid]$)$NL$
-		#define TOPPERS_PRC$prcid$_ISTK		($ICS.ISTK[icsid]$)$NL$
+		#define TOPPERS_PRC$prcid$_ISTK		(void *)($ICS.ISTK[icsid]$)$NL$
 	$END$
 $END$
 $NL$
@@ -1635,15 +1672,15 @@ void$NL$
 _kernel_initialize_object(void)$NL$
 {$NL$
 $TAB$_kernel_initialize_task();$NL$
-$IF LENGTH(SEM.ID_LIST)$	_kernel_initialize_semaphore();$NL$$END$
-$IF LENGTH(FLG.ID_LIST)$	_kernel_initialize_eventflag();$NL$$END$
-$IF LENGTH(DTQ.ID_LIST)$	_kernel_initialize_dataqueue();$NL$$END$
-$IF LENGTH(PDQ.ID_LIST)$	_kernel_initialize_pridataq();$NL$$END$
-$IF LENGTH(MBX.ID_LIST)$	_kernel_initialize_mailbox();$NL$$END$
-$IF LENGTH(MPF.ID_LIST)$	_kernel_initialize_mempfix();$NL$$END$
-$IF LENGTH(CYC.ID_LIST)$	_kernel_initialize_cyclic();$NL$$END$
-$IF LENGTH(ALM.ID_LIST)$	_kernel_initialize_alarm();$NL$$END$
-$IF LENGTH(SPN.ID_LIST)$	_kernel_initialize_spin_lock();$NL$$END$
+$IF LENGTH(SEM.ID_LIST)$$TAB$_kernel_initialize_semaphore();$NL$$END$
+$IF LENGTH(FLG.ID_LIST)$$TAB$_kernel_initialize_eventflag();$NL$$END$
+$IF LENGTH(DTQ.ID_LIST)$$TAB$_kernel_initialize_dataqueue();$NL$$END$
+$IF LENGTH(PDQ.ID_LIST)$$TAB$_kernel_initialize_pridataq();$NL$$END$
+$IF LENGTH(MBX.ID_LIST)$$TAB$_kernel_initialize_mailbox();$NL$$END$
+$IF LENGTH(MPF.ID_LIST)$$TAB$_kernel_initialize_mempfix();$NL$$END$
+$IF LENGTH(CYC.ID_LIST)$$TAB$_kernel_initialize_cyclic();$NL$$END$
+$IF LENGTH(ALM.ID_LIST)$$TAB$_kernel_initialize_alarm();$NL$$END$
+$IF LENGTH(SPN.ID_LIST)$$TAB$_kernel_initialize_spin_lock();$NL$$END$
 $TAB$_kernel_initialize_interrupt();$NL$
 $TAB$_kernel_initialize_exception();$NL$
 }$NL$

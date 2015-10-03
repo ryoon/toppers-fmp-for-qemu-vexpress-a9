@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: pridataq.c 654 2010-07-25 14:17:01Z ertl-honda $
+ *  @(#) $Id: pridataq.c 1095 2015-02-13 13:13:56Z ertl-honda $
  */
 
 /*
@@ -397,7 +397,6 @@ ipsnd_pdq(ID pdqid, intptr_t data, PRI datapri)
 			}
 		}
 		release_nested_tsk_lock(p_pcb);
-		i_unlock_cpu();
 		ercd = E_OK;
 	}
 	else if (p_pdqcb->count < p_pdqcb->p_pdqinib->pdqcnt) {

@@ -2,7 +2,7 @@
  *  TOPPERS Software
  *      Toyohashi Open Platform for Embedded Real-Time Systems
  * 
- *  Copyright (C) 2006-2010 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2006-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -34,7 +34,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: histogram.h 667 2010-08-01 14:05:54Z ertl-honda $
+ *  @(#) $Id: histogram.h 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -56,7 +56,7 @@ extern void	init_hist_hw(void);
 /*
  *  実行時間分布計測の初期化
  */
-extern void	init_hist(ID histid, uint_t maxval, uint_t *hist);
+extern void	init_hist(ID histid, uint_t maxval, uint_t histarea[]);
 
 /*
  *  実行時間計測の開始

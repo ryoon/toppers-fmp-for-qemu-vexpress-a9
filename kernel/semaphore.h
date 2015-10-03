@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2005-2009 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2005-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: semaphore.h 378 2009-09-11 16:21:24Z ertl-honda $
+ *  @(#) $Id: semaphore.h 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -47,7 +47,7 @@
 #ifndef TOPPERS_SEMAPHORE_H
 #define TOPPERS_SEMAPHORE_H
 
-#include <queue.h>
+#include "wait.h"
 
 /*
  *  セマフォ初期化ブロック

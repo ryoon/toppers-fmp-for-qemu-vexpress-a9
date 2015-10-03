@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2005-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2005-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: task.c 804 2011-05-20 01:14:21Z ertl-honda $
+ *  @(#) $Id: task.c 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -86,7 +86,7 @@ initialize_task(void)
 			p_tcb->p_pcb = my_p_pcb;
 			make_dormant(p_tcb);
 			if ((p_tcb->p_tinib->tskatr & TA_ACT) != 0U) {
-				make_active(p_tcb);
+				(void) make_active(p_tcb);
 			}
 		}
 	}

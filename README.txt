@@ -1,5 +1,5 @@
 
-	TOPPERS/FMP Kernel（Release 1.2.3）
+	TOPPERS/FMP Kernel（Release 1.3.0）
 		Toyohashi Open Platform for Embedded Real-Time Systems/
 		Flexible MultiProcessor Kernel
 
@@ -22,7 +22,7 @@ FMPカーネルのドキュメント（プレーンテキストファイル）およびソースファイ
 
 本バージョンに対応したコンフィギュレータのバージョンは．次の通りです．
 
-   1.9.0
+   1.9.4
 
 【質問・バグレポート・意見等の送付先】
 
@@ -42,12 +42,5 @@ TOPPERSユーザーズメーリングリストへの登録方法については，以下のページに
 FMPカーネルを，TOPPERSプロジェクトからオープンソースにすることを前提に，
 未サポートのターゲットにポーティングされる場合には，あらかじめご相談く
 ださると幸いです．
-
-【今後の改造計画】
-
-今後（Release 1.3以降），ASPカーネルに対して大きな変更の可能性がある項
-目は次の通りです．
-
-・TOPPERS組込みコンポーネントシステム（TECS）の導入．
 
 以上

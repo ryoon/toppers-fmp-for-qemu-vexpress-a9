@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2004-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2004-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: t_syslog.h 792 2011-03-10 14:18:33Z ertl-honda $
+ *  @(#) $Id: t_syslog.h 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -146,89 +146,89 @@ extern ER	syslog_wri_log(uint_t prio, const SYSLOG *p_syslog) throw();
 Inline void
 _syslog_0(uint_t prio, uint_t type)
 {
-	SYSLOG	syslog;
+	SYSLOG	logbuf;
 
-	syslog.logtype = type;
-	(void) syslog_wri_log(prio, &syslog);
+	logbuf.logtype = type;
+	(void) syslog_wri_log(prio, &logbuf);
 }
 
 Inline void
 _syslog_1(uint_t prio, uint_t type, intptr_t arg1)
 {
-	SYSLOG	syslog;
+	SYSLOG	logbuf;
 
-	syslog.logtype = type;
-	syslog.loginfo[0] = arg1;
-	(void) syslog_wri_log(prio, &syslog);
+	logbuf.logtype = type;
+	logbuf.loginfo[0] = arg1;
+	(void) syslog_wri_log(prio, &logbuf);
 }
 
 Inline void
 _syslog_2(uint_t prio, uint_t type, intptr_t arg1, intptr_t arg2)
 {
-	SYSLOG	syslog;
+	SYSLOG	logbuf;
 
-	syslog.logtype = type;
-	syslog.loginfo[0] = arg1;
-	syslog.loginfo[1] = arg2;
-	(void) syslog_wri_log(prio, &syslog);
+	logbuf.logtype = type;
+	logbuf.loginfo[0] = arg1;
+	logbuf.loginfo[1] = arg2;
+	(void) syslog_wri_log(prio, &logbuf);
 }
 
 Inline void
 _syslog_3(uint_t prio, uint_t type, intptr_t arg1, intptr_t arg2,
 														intptr_t arg3)
 {
-	SYSLOG	syslog;
+	SYSLOG	logbuf;
 
-	syslog.logtype = type;
-	syslog.loginfo[0] = arg1;
-	syslog.loginfo[1] = arg2;
-	syslog.loginfo[2] = arg3;
-	(void) syslog_wri_log(prio, &syslog);
+	logbuf.logtype = type;
+	logbuf.loginfo[0] = arg1;
+	logbuf.loginfo[1] = arg2;
+	logbuf.loginfo[2] = arg3;
+	(void) syslog_wri_log(prio, &logbuf);
 }
 
 Inline void
 _syslog_4(uint_t prio, uint_t type, intptr_t arg1, intptr_t arg2,
 										intptr_t arg3, intptr_t arg4)
 {
-	SYSLOG	syslog;
+	SYSLOG	logbuf;
 
-	syslog.logtype = type;
-	syslog.loginfo[0] = arg1;
-	syslog.loginfo[1] = arg2;
-	syslog.loginfo[2] = arg3;
-	syslog.loginfo[3] = arg4;
-	(void) syslog_wri_log(prio, &syslog);
+	logbuf.logtype = type;
+	logbuf.loginfo[0] = arg1;
+	logbuf.loginfo[1] = arg2;
+	logbuf.loginfo[2] = arg3;
+	logbuf.loginfo[3] = arg4;
+	(void) syslog_wri_log(prio, &logbuf);
 }
 
 Inline void
 _syslog_5(uint_t prio, uint_t type, intptr_t arg1, intptr_t arg2,
 							intptr_t arg3, intptr_t arg4, intptr_t arg5)
 {
-	SYSLOG	syslog;
+	SYSLOG	logbuf;
 
-	syslog.logtype = type;
-	syslog.loginfo[0] = arg1;
-	syslog.loginfo[1] = arg2;
-	syslog.loginfo[2] = arg3;
-	syslog.loginfo[3] = arg4;
-	syslog.loginfo[4] = arg5;
-	(void) syslog_wri_log(prio, &syslog);
+	logbuf.logtype = type;
+	logbuf.loginfo[0] = arg1;
+	logbuf.loginfo[1] = arg2;
+	logbuf.loginfo[2] = arg3;
+	logbuf.loginfo[3] = arg4;
+	logbuf.loginfo[4] = arg5;
+	(void) syslog_wri_log(prio, &logbuf);
 }
 
 Inline void
 _syslog_6(uint_t prio, uint_t type, intptr_t arg1, intptr_t arg2,
 				intptr_t arg3, intptr_t arg4, intptr_t arg5, intptr_t arg6)
 {
-	SYSLOG	syslog;
+	SYSLOG	logbuf;
 
-	syslog.logtype = type;
-	syslog.loginfo[0] = arg1;
-	syslog.loginfo[1] = arg2;
-	syslog.loginfo[2] = arg3;
-	syslog.loginfo[3] = arg4;
-	syslog.loginfo[4] = arg5;
-	syslog.loginfo[5] = arg6;
-	(void) syslog_wri_log(prio, &syslog);
+	logbuf.logtype = type;
+	logbuf.loginfo[0] = arg1;
+	logbuf.loginfo[1] = arg2;
+	logbuf.loginfo[2] = arg3;
+	logbuf.loginfo[3] = arg4;
+	logbuf.loginfo[4] = arg5;
+	logbuf.loginfo[5] = arg6;
+	(void) syslog_wri_log(prio, &logbuf);
 }
 
 /*
@@ -297,27 +297,27 @@ syslog(uint_t prio, const char *format, ...)
  */
 
 #define syslog_0(prio, format) \
-				_syslog_1(prio, LOG_TYPE_COMMENT, (intptr_t) format)
+				_syslog_1(prio, LOG_TYPE_COMMENT, (intptr_t) (format))
 
 #define syslog_1(prio, format, arg1) \
-				_syslog_2(prio, LOG_TYPE_COMMENT, (intptr_t) format, \
+				_syslog_2(prio, LOG_TYPE_COMMENT, (intptr_t) (format), \
 														(intptr_t)(arg1))
 
 #define syslog_2(prio, format, arg1, arg2) \
-				_syslog_3(prio, LOG_TYPE_COMMENT, (intptr_t) format, \
+				_syslog_3(prio, LOG_TYPE_COMMENT, (intptr_t) (format), \
 										(intptr_t)(arg1), (intptr_t)(arg2))
 
 #define syslog_3(prio, format, arg1, arg2, arg3) \
-				_syslog_4(prio, LOG_TYPE_COMMENT, (intptr_t) format, \
+				_syslog_4(prio, LOG_TYPE_COMMENT, (intptr_t) (format), \
 						(intptr_t)(arg1), (intptr_t)(arg2), (intptr_t)(arg3))
 
 #define syslog_4(prio, format, arg1, arg2, arg3, arg4) \
-				_syslog_5(prio, LOG_TYPE_COMMENT, (intptr_t) format, \
+				_syslog_5(prio, LOG_TYPE_COMMENT, (intptr_t) (format), \
 						(intptr_t)(arg1), (intptr_t)(arg2), (intptr_t)(arg3), \
 														(intptr_t)(arg4))
 
 #define syslog_5(prio, format, arg1, arg2, arg3, arg4, arg5) \
-				_syslog_6(prio, LOG_TYPE_COMMENT, (intptr_t) format, \
+				_syslog_6(prio, LOG_TYPE_COMMENT, (intptr_t) (format), \
 						(intptr_t)(arg1), (intptr_t)(arg2), (intptr_t)(arg3), \
 										(intptr_t)(arg4), (intptr_t)(arg5))
 

@@ -4,7 +4,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2004-2008 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2004-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -36,7 +36,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: log_output.h 12 2008-11-26 07:24:48Z ertl-honda $
+ *  @(#) $Id: log_output.h 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -59,7 +59,7 @@ extern "C" {
  *  成したメッセージを，1文字出力関数putcを用いて出力する．
  */
 extern void	syslog_printf(const char *format, const intptr_t *p_args,
-										void (*putc)(char_t)) throw();
+										void (*putc)(char)) throw();
 
 /*
  *  ログ情報の出力
@@ -67,15 +67,15 @@ extern void	syslog_printf(const char *format, const intptr_t *p_args,
  *  p_syslogで指定されるログ情報を文字列に整形し，1文字出力関数putcを用
  *  いて出力する．
  */
-extern void	syslog_print(const SYSLOG *p_syslog, void (*putc)(char_t)) throw();
+extern void	syslog_print(const SYSLOG *p_syslog, void (*putc)(char)) throw();
 
 /*
  *  ログ情報喪失メッセージ文字列
  *
- *  lost個のログ情報が失われた旨のメッセージを，1文字出力関数putcを用い
- *  て出力する．
+ *  lostlog個のログ情報が失われた旨のメッセージを，1文字出力関数putcを
+ *  用いて出力する．
  */
-extern void	syslog_lostmsg(uint_t lost, void (*putc)(char_t)) throw();
+extern void	syslog_lostmsg(uint_t lostlog, void (*putc)(char)) throw();
 
 #ifdef __cplusplus
 }

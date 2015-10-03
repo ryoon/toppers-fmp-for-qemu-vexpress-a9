@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  *
- *  @(#) $Id: core_kernel.h 1067 2014-12-24 14:15:10Z ertl-honda $
+ *  @(#) $Id: core_kernel.h 1096 2015-02-14 10:48:14Z ertl-honda $
  */
 
 /*
@@ -77,6 +77,17 @@ typedef struct {
 #endif /* USE_GIC_CPULOCK */
 	uint32_t nest_count;
 	uint32_t ipm;
+#if defined(SUPPORT_VFPv3_NEON)
+	uint64_t d0;
+	uint64_t d1;
+	uint64_t d2;
+	uint64_t d3;
+	uint64_t d4;
+	uint64_t d5;
+	uint64_t d6;
+	uint64_t d7;
+	uint32_t fpscr;
+#endif /* SUPPORT_VFPv3_NEON */
 	uint32_t r0;
 	uint32_t r1;
 	uint32_t r2;

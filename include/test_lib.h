@@ -2,7 +2,7 @@
  *  TOPPERS Software
  *      Toyohashi Open Platform for Embedded Real-Time Systems
  * 
- *  Copyright (C) 2005-2010 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2005-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -40,6 +40,12 @@
 /* 
  *		テストプログラム用ライブラリ
  */
+#ifndef TOPPERS_TEST_LIB_H
+#define TOPPERS_TEST_LIB_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <t_stddef.h>
 
@@ -52,6 +58,11 @@ typedef ER (*BIT_FUNC)(void);
  *	自己診断関数の設定
  */
 extern void	set_bit_func(BIT_FUNC bit_func);
+
+/*
+ *  テストプログラムの開始
+ */
+extern void	test_start(char *progname);
 
 /*
  *  システムログの出力処理
@@ -130,3 +141,9 @@ check_state_i(bool_t ctx, bool_t loc, bool_t dsp, bool_t dpn, bool_t tex)
  *  バリア同期
  */
 extern void barrier_sync(uint_t phase);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* TOPPERS_TEST_LIB_H */

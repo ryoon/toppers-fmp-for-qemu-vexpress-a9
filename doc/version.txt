@@ -2,8 +2,8 @@
 		TOPPERS/FMPカーネル
 		変更履歴
 
-		対応バージョン: Release 1.2.3
-		最終更新: 2012年12月24日
+		対応バージョン: Release 1.3.0
+		最終更新: 2015年02月17日
 
 このドキュメントは，TOPPERS/FMPカーネルのRelease 0.A.0以降の変更履歴を，
 新しい方から順に記述したものである．
@@ -13,7 +13,7 @@
      Toyohashi Open Platform for Embedded Real-Time Systems/
      Flexible MultiProcessor Kernel
 
- Copyright (C) 2005-2014 by Embedded and Real-Time Systems Laboratory
+ Copyright (C) 2005-2015 by Embedded and Real-Time Systems Laboratory
              Graduate School of Information Science, Nagoya Univ., JAPAN
  
  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -45,10 +45,127 @@
  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  の責任を負わない．
  
- @(#) $Id: version.txt 1070 2014-12-24 14:17:38Z ertl-honda $
+ @(#) $Id: version.txt 1097 2015-02-17 06:32:37Z ertl-honda $
  ----------------------------------------------------------------------
           TOPPERS/FMPカーネル
-        Release 1.2.1 から 1.2.3 への変更点
+        Release 1.2.3 から 1.3.0 への変更点
+        リリース日時 2015-2-17
+
+○変更点のリスト
+・./kernel/kernel_impl.h
+	存在しないkerflgのextern宣言を削除．
+・./kernel/pridataq.c
+	ipsnd_pdq()においてロックを全て解放する前に割込みを許可するパスが
+	存在していた問題を修正．
+	
+・ASP カーネル 1.9.1追従
+
+	・その他の修正
+		- xsns_dpnとxsns_xpnで，kerflgもチェックするように修正（安全性の向
+		  上のための修正）．
+		- kernel.tf中で，スタック領域の確保にALLOC_STACKを使うように修正．
+
+・ASP カーネル 1.9.0追従
+
+	・コンフィギュレータのパス3のテンプレートファイルに，ターゲット依存部で
+	　設定したセクションを，LMAからVMAにコピーする処理を追加
+
+	・サンプルのMakefileの修正
+		- C言語の時に-lcを付けるように修正．
+		- CFG_OBJSを，CFG_ASMOBJSとCFG_COBJSに分離．
+
+	・先頭番地のチェックコードの修正
+		- 先頭番地のサイズが固定値になっていたところを，sizeof_FPに修正．
+		- オーバランハンドラ機能拡張において，オーバランハンドラの先頭番地
+		  のチェックを追加．
+
+	・静的APIにおけるエラーチェックの追加
+		- 符号無しのパラメータに負の値を指定した場合のエラーチェックを追加．
+		- イベントフラグの初期ビットパターンのエラーチェックを追加．
+
+	・その他のバグフィックス
+		- kernel_def.csvにTARGET_MIN_ISTKSZを追加．
+		- オーバランハンドラ機能拡張で，オーバランハンドラをサポートしてい
+		  ないターゲットでDEF_OVRを使用した場合には，コンフィギュレータでエ
+		  ラーとするように修正．
+
+	・その他の修正
+	- スタック領域と固定長メモリプール領域の先頭番地をユーザが指定した
+	  場合には，kernel_cfg.c中で(void *)型にキャストするように修正．動
+	  的生成機能拡張のカーネルが割り付けるメモリ領域の先頭番地も同様．
+	- TNUM_PORTが5以上の時は，serial.cでエラーを報告する．
+	- makedepとmakereleaseを改善．
+
+	○ターゲット依存部の要修正箇所（1.8.0 → 1.9.0）
+
+	(1) CFG_OBJSをCFG_COBJSにリネーム
+		- Makefileのターゲット依存部でCFG_OBJSを定義している場合には，
+		  CFG_COBJSにリネームする．
+
+・ASP カーネル 1.8.0追従
+
+	・char_t型の廃止
+
+	・SILのメモリ空間読出し関数に渡すポインタの属性の変更
+		- sil_r??_???に渡しポインタに，const属性を追加．
+
+	・非タスクコンテキスト用のスタック領域のサイズチェックの追加
+		- DEF_ICSのistkszがターゲット定義の最小値（TARGET_MIN_ISTKSZ）より
+		  も小さい場合にE_PARエラーとする処理を追加．
+
+	・vasyslog.cをlibraryディレクトリに移動
+
+	・MISRA-C対応のためのコードの修正
+		- 文をマクロ定義している箇所をdo{}while(false)で囲む．
+		- コンマ演算子に使用を最小限に．
+		- 多重代入文をやめる．
+		- 符号無し整数定数にUをつける．
+		- 標準的な名前を変数名として使わないように修正．
+		- 返値を使わない関数呼出しを(void)にキャストする．
+
+	・その他のバグフィックス
+		- kernel_check.tfでエラーメッセージの出力処理を修正．
+
+	・サンプルのMakefileの修正
+		- カーネルライブラリを別ディレクトリで作成する時に，カーネルライブ
+		  ラリが更新されたら，オブジェクトファイルを再構築するように修正．
+		- CFG2_OUTをCFG2_OUT_SRCSにリネーム．
+		- LDFLAGSは，cfg1_out.cのリンク時には適用されないように修正．
+		- log_output.o，vasyslog.o，t_perror.o，strerror.oを，SYS_COBJSから
+		  APPL_COBJSに移動．
+
+	・その他の修正
+		- semaphore.h等からwait.hをインクルードするように修正．
+		- TOPPERS_EMPTY_LABELのデフォルトの定義をkernel_int.hに移動．
+		- __STDC_VERSION__が定義されていない場合に対応．
+		- test_lib.hに多重インクルードの防止コードを追加．
+		- ユーティリティプログラムを新しいperlに対応するように修正．
+		- gentestを拡張（CPU例外ハンドラの生成，GOTOに対応など）．
+		- configureにオプションを追加．
+
+	・ドキュメントの充実，コメントの修正
+
+	○ターゲット依存部の要修正箇所（1.7.0 → 1.8.0）
+
+		(1) char_t型をchar型に修正
+
+		(2) TARGET_MIN_ISTKSZの定義を追加（オプション）
+			- 非タスクコンテキストのスタックサイズの最小値をチェックする場合に
+			  は，最小値をTARGET_MIN_ISTKSZに定義する．
+
+		(3) CFG2_OUTをCFG2_OUT_SRCSにリネーム
+			- Makefileのターゲット依存部でCFG2_OUTを定義している場合には，
+			  CFG2_OUT_SRCSにリネームする．
+
+		(4) CFG1_OUT_LDFLAGSの定義
+			- Makefileのターゲット依存部で定義したLDFLAGSは，cfg1_out.cをリンク
+			  する際には適用されないように変更したため，LDFLAGSに定義したオプショ
+			  ンで，cfg1_out.cをリンクする際にも必要なものは，CFG1_OUT_LDFLAGS
+			  にも定義するように修正する
+
+----------------------------------------------------------------------
+          TOPPERS/FMPカーネル
+        Release 1.2.2 から 1.2.3 への変更点
         リリース日時 2014-12-24
 
 ○変更点のリスト

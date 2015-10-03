@@ -4,7 +4,7 @@
  * 
  *  Copyright (C) 2000 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2006-2008 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2006-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -36,7 +36,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: queue.h 333 2009-07-17 04:13:48Z ertl-honda $
+ *  @(#) $Id: queue.h 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -73,7 +73,8 @@ typedef struct queue {
 Inline void
 queue_initialize(QUEUE *p_queue)
 {
-	p_queue->p_prev = p_queue->p_next = p_queue;
+	p_queue->p_prev = p_queue;
+	p_queue->p_next = p_queue;
 }
 
 /*

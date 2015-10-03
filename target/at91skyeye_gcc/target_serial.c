@@ -36,7 +36,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: target_serial.c 926 2012-03-30 10:18:29Z ertl-honda $
+ *  @(#) $Id: target_serial.c 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -184,7 +184,7 @@ uart_putready(SIOPCB *p_siopcb)
 Inline uint8_t
 uart_getchar(SIOPCB *p_siopcb)
 {
-	char_t c;
+	char c;
      
 	c = p_siopcb->usart_rev_buf;
 	sil_wrw_mem((void *)(p_siopcb->p_siopinib->us_rpr), (uint32_t)(&(p_siopcb->usart_rev_buf)));
@@ -344,7 +344,7 @@ sio_handler(void)
  *  シリアルI/Oポートへの文字送信
  */
 bool_t
-sio_snd_chr(SIOPCB *siopcb, char_t c)
+sio_snd_chr(SIOPCB *siopcb, char c)
 {    
 	if (uart_putready(siopcb)){
 		uart_putchar(siopcb, c);

@@ -20,7 +20,7 @@ $DEFINE("PCB_ipmflg", offsetof_PCB_ipmflg)$
 $DEFINE("PCB_disdsp", offsetof_PCB_disdsp)$
 $DEFINE("PCB_dspflg", offsetof_PCB_dspflg)$
 
-
+$DEFINE("EXC_FRAME_cpsr", offsetof_EXC_FRAME_cpsr)$
 
 $
 $  ビットオフセット値等のマクロ定義の生成

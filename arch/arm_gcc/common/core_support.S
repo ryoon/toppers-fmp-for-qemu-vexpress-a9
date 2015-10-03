@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  *
- *  @(#) $Id: core_support.S 1067 2014-12-24 14:15:10Z ertl-honda $
+ *  @(#) $Id: core_support.S 1096 2015-02-14 10:48:14Z ertl-honda $
  */
 
 /*
@@ -106,6 +106,10 @@ ALABEL(dispatch)
      *  れる．
      */
     stmfd  sp!, {r4 - r11,lr}           /* レジスタの保存 */
+#if defined(SUPPORT_VFPv3_NEON)
+    vpush   {d8-d15}
+    vpush   {d16-d31}
+#endif /* SUPPORT_VFPv3_NEON */
     my_pcb r0, r1                       /* p_runtskを読み込む */
     ldr    r1, [r0,#PCB_p_runtsk]
     str    sp, [r1,#TCB_sp]             /* タスクスタックを保存 */
@@ -114,6 +118,10 @@ ALABEL(dispatch)
     b      dispatcher
 
 ALABEL(dispatch_r)
+#if defined(SUPPORT_VFPv3_NEON)
+    vpop    {d16-d31}
+    vpop    {d8-d15}
+#endif /* SUPPORT_VFPv3_NEON */
     ldmfd sp!,{r4 - r11,lr}     /* レジスタの復帰 */
     /*
      *  タスク例外処理ルーチンの起動
@@ -141,6 +149,10 @@ ALABEL(dispatch_r_1)
     AGLOBAL(dispatch_and_migrate)
 ALABEL(dispatch_and_migrate)
     stmfd  sp!, {r4 - r11,lr}           /* レジスタの保存 */
+#if defined(SUPPORT_VFPv3_NEON)
+    vpush   {d8-d15}
+    vpush   {d16-d31}
+#endif /* SUPPORT_VFPv3_NEON */
     my_pcb r2, r1                       /* p_runtskを読み込む */
     ldr    r1, [r2,#PCB_p_runtsk]
     str    sp, [r1,#TCB_sp]             /* タスクスタックを保存 */
@@ -431,6 +443,11 @@ ALABEL(ret_int_2)
     msr   spsr_cxsf, r1              /* 戻り先のcpsrをspsrに設定 */
     ldmfd sp!,{r0-r3,ip,lr,pc}^ /* コンテキストの復帰，^付きなので、cpsr <- spsr */
 #else /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
+#if defined(SUPPORT_VFPv3_NEON)
+    vpop    {d0-d7}             /* スクラッチレジスタの復帰 */
+    pop     {R0}                /* FPSCRレジスタの復帰      */
+    vmsr    fpscr, R0
+#endif /* SUPPORT_VFPv3_NEON */
     ldmfd sp!,{r0-r3,ip,lr}
     rfeia sp!
 #endif /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
@@ -485,12 +502,21 @@ ALABEL(ret_int_4)
     cmp   r1, r2              /* p_runtskとp_schedtskが同じなら */
     beq   ret_int_r_1         /*                    ret_int_r_1へ */
     stmfd sp!, {r4-r11}       /* 残りのレジスタを保存 */
+#if defined(SUPPORT_VFPv3_NEON)
+    /* 残りの浮動小数点/NEONレジスタを保存  */
+    vpush   {d8-d15}
+    vpush   {d16-d31}
+#endif /* SUPPORT_VFPv3_NEON */
     str   sp, [r1,#TCB_sp]    /* タスクスタックを保存 */
     adr   r2, ret_int_r       /* 実行再開番地を保存   */
     str   r2, [r1,#TCB_pc]
     b     dispatcher
 
 ALABEL(ret_int_r)
+#if defined(SUPPORT_VFPv3_NEON)
+    vpop    {d16-d31}
+    vpop    {d8-d15}
+#endif /* SUPPORT_VFPv3_NEON */
     ldmfd sp!, {r4-r11}       /* レジスタの復帰 */
 ALABEL(ret_int_r_1)
     /*
@@ -527,6 +553,11 @@ ALABEL(ret_int_r_2)
     msr   spsr_cxsf,r0          /* 戻り先のcpsrをspsrに設定 */
     ldmfd sp!,{r0-r3,ip,lr,pc}^ /* タスクに復帰 ^付きなので、cpsr <- spsr */
 #else /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
+#if defined(SUPPORT_VFPv3_NEON)
+    vpop    {d0-d7}        /* スクラッチレジスタの復帰 */
+    pop     {R0}           /* FPSCRレジスタの復帰 */
+    vmsr    fpscr, R0
+#endif /* SUPPORT_VFPv3_NEON */
     ldmfd sp!,{r0-r3,ip,lr}
     rfeia sp!
 #endif /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */

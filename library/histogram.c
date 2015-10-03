@@ -2,7 +2,7 @@
  *  TOPPERS Software
  *      Toyohashi Open Platform for Embedded Real-Time Systems
  * 
- *  Copyright (C) 2006-2010 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2006-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -34,7 +34,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: histogram.c 661 2010-07-29 10:10:12Z ertl-honda $
+ *  @(#) $Id: histogram.c 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -90,7 +90,7 @@ typedef struct histogram_control_block {
 /*
  *  実行時間分布計測管理ブロックのエリア
  */
-HISTCB	histcb_table[TNUM_HIST];
+static HISTCB	histcb_table[TNUM_HIST];
 
 /*
  *  実行時間分布計測IDの最小値と最大値

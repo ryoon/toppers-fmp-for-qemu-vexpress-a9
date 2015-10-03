@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2005-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2005-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: exception.c 792 2011-03-10 14:18:33Z ertl-honda $
+ *  @(#) $Id: exception.c 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -79,7 +79,8 @@ initialize_exception(void)
 	uint_t			i;
 	const EXCINIB	*p_excinib;
 
-	for (p_excinib = excinib_table, i = 0; i < tnum_excno; p_excinib++, i++) {
+	for (i = 0; i < tnum_excno; i++) {
+		p_excinib = &(excinib_table[i]);
 		x_define_exc(p_excinib->excno, p_excinib->exc_entry);
 	}
 }
@@ -107,7 +108,8 @@ xsns_dpn(void *p_excinf)
 
 	LOG_XSNS_DPN_ENTER(p_excinf);
 	my_p_pcb = get_my_p_pcb();
-	state = (exc_sense_intmask(p_excinf) && !(my_p_pcb->disdsp)) ? false : true;
+	state = (my_p_pcb->kerflg && exc_sense_intmask(p_excinf)
+								 && !(my_p_pcb->disdsp)) ? false : true;
 	LOG_XSNS_DPN_LEAVE(state);
 	return(state);
 }
@@ -133,7 +135,8 @@ xsns_xpn(void *p_excinf)
 	LOG_XSNS_XPN_ENTER(p_excinf);
 	my_p_pcb = get_my_p_pcb();
 	p_runtsk = my_p_pcb->p_runtsk;
-	state = (exc_sense_intmask(p_excinf) && p_runtsk->enatex) ? false : true;
+	state = (my_p_pcb->kerflg && exc_sense_intmask(p_excinf)
+							 && p_runtsk->enatex) ? false : true;
 	LOG_XSNS_XPN_LEAVE(state);
 	return(state);
 }

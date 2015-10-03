@@ -4,7 +4,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2004-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2004-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -36,7 +36,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: t_stddef.h 905 2012-02-27 09:01:23Z ertl-honda $
+ *  @(#) $Id: t_stddef.h 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -97,7 +97,6 @@ typedef	void			(*TOPPERS_fp_t)(struct TOPPERS_dummy_t);
  *  共通データ型
  */
 typedef TOPPERS_bool	bool_t;		/* 真偽値 */
-typedef unsigned char	char_t;		/* 符号無しの文字型 */
 
 typedef signed int		int_t;		/* 自然なサイズの符号付き整数 */
 typedef unsigned int	uint_t;		/* 自然なサイズの符号無し整数 */
@@ -211,6 +210,9 @@ typedef	struct acvct {				/* アクセス許可ベクタ */
 
 /*
  *  型に関する情報を取り出すためのマクロ
+ * 
+ *  以下のALIGN_TYPEの定義は，アラインメントの単位が2の巾乗であることを
+ *  仮定している．
  */
 #ifndef offsetof
 #define	offsetof(structure, field)	((uintptr_t) &(((structure *) 0)->field))
@@ -252,7 +254,7 @@ typedef	struct acvct {				/* アクセス許可ベクタ */
  */
 #ifndef ERCD
 #define ERCD(mercd, sercd) \
-				((ER)((((uint_t) sercd) << 8) | (((uint_t) mercd) & 0xffU)))
+				((ER)((((uint_t)(sercd)) << 8) | (((uint_t)(mercd)) & 0xffU)))
 #endif /* ERCD */
 
 #ifndef MERCD

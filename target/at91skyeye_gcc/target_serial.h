@@ -4,7 +4,7 @@
  *      Flexible MultiProcessor Kernel
  * 
  *  Copyright (C) 2006 by GJ Business Division RICOH COMPANY,LTD. JAPAN  
- *  Copyright (C) 2007-2009 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2007-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -36,7 +36,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: target_serial.h 447 2009-10-16 08:51:47Z ertl-honda $
+ *  @(#) $Id: target_serial.h 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -99,7 +99,7 @@ extern  void at91skyeye_init_uart(uint_t siopid);
  *  UARTからのポーリング出力
  */
 Inline void
-at91skyeye_putc(char_t c)
+at91skyeye_putc(char c)
 {
 	sil_wrw_mem((void *)USART0_THR, c);
 }
@@ -127,7 +127,7 @@ extern void sio_handler(void);
 /*
  *  シリアルI/Oポートへの文字送信
  */
-extern bool_t sio_snd_chr(SIOPCB *siopcb, char_t c);
+extern bool_t sio_snd_chr(SIOPCB *siopcb, char c);
 
 /*
  *  シリアルI/Oポートからの文字受信

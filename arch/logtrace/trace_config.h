@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2004-2012 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2004-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,15 +37,16 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: trace_config.h 911 2012-03-09 01:18:37Z ertl-honda $
+ *  @(#) $Id: trace_config.h 1091 2015-02-03 01:46:29Z ertl-honda $
  */
 
 /*
  *		トレースログに関する設定
  *
  *  このインクルードファイルは，target_config.hおよびtarget_syssvc.hの
- *  みからインクルードされる．他のファイルから直接インクルードしてはな
- *  らない．
+ *  みからインクルードされる．また，トレースログ機能の初期化や記録の開 
+ *  始／停止，トレースログのダンプを行うプログラムからインクルードする 
+ *  ことを想定している． 
  */
 
 #ifndef TOPPERS_TRACE_CONFIG_H

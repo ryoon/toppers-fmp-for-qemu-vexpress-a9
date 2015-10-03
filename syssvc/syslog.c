@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2005-2010 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2005-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: syslog.c 900 2012-02-24 05:25:12Z ertl-honda $
+ *  @(#) $Id: syslog.c 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -261,7 +261,8 @@ syslog_initialize(intptr_t exinf)
 	SYSLOGCB *p_syslogcb = get_p_syslogcb();
 
 	p_syslogcb->syslog_count = 0U;
-	p_syslogcb->syslog_head = p_syslogcb->syslog_tail = 0U;
+	p_syslogcb->syslog_head = 0U;
+	p_syslogcb->syslog_tail = 0U;
 	p_syslogcb->syslog_lost = 0U;
     
 	p_syslogcb->syslog_logmask = 0U;
@@ -336,7 +337,7 @@ syslog_wri_log(uint_t prio, const SYSLOG *p_syslog)
 	 */
 	if (((~(p_syslogcb->syslog_lowmask_not)) & LOG_MASK(prio)) != 0U) {
 		syslog_print(p_syslog, target_fput_log);
-		(*target_fput_log)('\n');
+		target_fput_log('\n');
 	}
 
 #ifdef G_SYSLOG
@@ -452,7 +453,7 @@ syslog_msk_log(uint_t logmask, uint_t lowmask)
  *  ただし，グローバル方式の場合は，SILのスピンロック取得中に呼び出した
  *  場合の動作は保証しない．
  */
-ER_UINT
+ER
 syslog_ref_log(T_SYSLOG_RLOG *pk_rlog)
 {
 	SYSLOGCB *p_syslogcb;

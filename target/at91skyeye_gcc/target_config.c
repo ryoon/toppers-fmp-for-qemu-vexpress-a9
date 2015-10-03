@@ -4,7 +4,7 @@
  *      Flexible MultiProcessor Kernel
  * 
  *  Copyright (C) 2006 by GJ Business Division RICOH COMPANY,LTD. JAPAN
- *  Copyright (C) 2007-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2007-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -36,7 +36,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: target_config.c 843 2011-07-15 03:17:19Z ertl-honda $
+ *  @(#) $Id: target_config.c 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -286,7 +286,7 @@ cycle_counter_get(uint32_t *p_time)
  *  ターゲット依存の文字出力
  */
 void
-target_fput_log(char_t c)
+target_fput_log(char c)
 {
 	if (c == '\n') {
 		at91skyeye_putc('\r');
@@ -299,7 +299,7 @@ target_fput_log(char_t c)
  *  トレースログのファイル出力
  */
 void
-target_fput_log_file(char_t c)
+target_fput_log_file(char c)
 {
 	if (c == '\n') {
 		fputc('\r', trace_log_file);

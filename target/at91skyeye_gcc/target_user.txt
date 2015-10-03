@@ -1,6 +1,6 @@
 =====================================================================
                         AT91SKYEYEターゲット依存部
-                                  Last Modified: 2012 Mar 30 19:17:47
+                                  Last Modified: 2015 Jan 28 17:55:44
 =====================================================================
 
 ○概要
@@ -236,7 +236,7 @@ diff -urN lcov-1.9_org/bin/geninfo lcov-1.9/bin/geninfo
 
 トレースログをファイルへ出力するための文字出力関数を用意している．
 
- void target_fput_log_file(char_t c);
+ void target_fput_log_file(char c);
  
 この関数を trace_dump の引数とすることにより，トレースログは，
 kernel_trace.log というファイルに出力される．

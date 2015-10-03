@@ -3,7 +3,7 @@
  *      Toyohashi Open Platform for Embedded Real-Time Systems/
  *      Flexible MultiProcessor Kernel
  * 
- *  Copyright (C) 2007-2009 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2007-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -35,7 +35,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: trace_dump.c 246 2009-04-30 06:14:39Z ertl-honda $
+ *  @(#) $Id: trace_dump.c 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -2207,7 +2207,7 @@ trace_print_svcleave(TRACE *trace, intptr_t *info)
  *  トレースログの表示
  */
 static void
-trace_print(TRACE *p_trace, void (*putc)(char_t))
+trace_print(TRACE *p_trace, void (*putc)(char))
 {
 	intptr_t	traceinfo[TMAX_LOGINFO + 1];
 	const char	*tracemsg;
@@ -2338,9 +2338,9 @@ void
 trace_dump(intptr_t exinf)
 {
 	TRACE	trace;
-	void	(*putc)(char_t);
+	void	(*putc)(char);
 
-	putc = (void (*)(char_t)) exinf;
+	putc = (void (*)(char)) exinf;
 	while (trace_rea_log(&trace) >= 0) {
 		trace_print(&trace, putc);
 	}

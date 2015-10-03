@@ -2,7 +2,7 @@
  *  TOPPERS Software
  *      Toyohashi Open Platform for Embedded Real-Time Systems
  * 
- *  Copyright (C) 2005-2010 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2005-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -49,7 +49,7 @@
 #include <log_output.h>
 #include "syssvc/syslog.h"
 #include "target_syssvc.h"
-#include "test_lib.h"
+#include <test_lib.h>
 
 /*
  *  チェックポイント通過カウント変数配列要素を，０で初期化されることを想定
@@ -71,24 +71,33 @@ set_bit_func(BIT_FUNC bit_func)
 }
 
 /*
+ *  テストプログラムの開始
+ */
+void
+test_start(char *progname)
+{
+	syslog_1(LOG_NOTICE, "Test program: %s", progname);
+}
+
+/*
  *  システムログの出力処理
  */
 void
 syslog_flush(void)
 {
-	SYSLOG	syslog;
+	SYSLOG	logbuf;
 	ER_UINT	rercd;
 
 	/*
 	 *  ログバッファに記録されたログ情報を，低レベル出力機能を用いて出
 	 *  力する．
 	 */
-	while ((rercd = syslog_rea_log(&syslog)) >= 0) {
+	while ((rercd = syslog_rea_log(&logbuf)) >= 0) {
 		if (rercd > 0) {
 			syslog_lostmsg((uint_t) rercd, target_fput_log);
 		}
-		if (syslog.logtype >= LOG_TYPE_COMMENT) {
-			syslog_print(&syslog, target_fput_log);
+		if (logbuf.logtype >= LOG_TYPE_COMMENT) {
+			syslog_print(&logbuf, target_fput_log);
 			target_fput_log('\n');
 		}
 	}
@@ -104,7 +113,7 @@ test_finish(void)
 
 	SIL_LOC_INT();
 	syslog_flush();
-	ext_ker();
+	(void) ext_ker();
 }
 
 /*

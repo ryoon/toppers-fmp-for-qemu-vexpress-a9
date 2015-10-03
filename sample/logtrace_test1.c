@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2004-2009 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2004-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -53,7 +53,7 @@
 #include "logtrace_test1.h"
 #include "logtrace/trace_config.h"
 
-extern void target_fput_log(char_t c);
+extern void target_fput_log(char c);
 
 /*
  *  サービスコールのエラーのログ出力
@@ -71,7 +71,7 @@ svc_perror(const char *file, int_t line, const char *expr, ER ercd)
 /*
  *  並行実行されるタスクへのメッセージ領域
  */
-volatile char_t	message[3];
+volatile char	message[3];
 
 /*
  *  ループ回数
@@ -85,7 +85,7 @@ ulong_t	tex_loop;		/* 例外処理ルーチン内でのループ回数 */
 void task(intptr_t exinf)
 {
 	int_t		tskno = (int_t) exinf;
-	char_t		c;
+	char		c;
 
 	SVC_PERROR(ena_tex());
 	while (1) {

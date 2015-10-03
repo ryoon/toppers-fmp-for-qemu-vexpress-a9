@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2004-2009 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2004-2014 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: kernel_impl.h 491 2010-01-18 02:02:41Z ertl-honda $
+ *  @(#) $Id: kernel_impl.h 1080 2014-12-25 15:25:16Z ertl-honda $
  */
 
 /*
@@ -181,11 +181,6 @@ extern STK_T *const	istk_table[];		/* スタック領域の先頭番地 */
 #ifdef TOPPERS_ISTKPT
 extern STK_T *const	istkpt_table[];		/* スタックポインタの初期値 */
 #endif /* TOPPERS_ISTKPT */
-
-/*
- *  カーネル動作状態フラグ（startup.c）
- */
-extern bool_t	kerflg;
 
 /*
  *  カーネルの起動（startup.c）

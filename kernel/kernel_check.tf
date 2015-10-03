@@ -4,7 +4,7 @@ $   TOPPERS/FMP Kernel
 $       Toyohashi Open Platform for Embedded Real-Time Systems/
 $       Flexible MultiProcessor Kernel
 $ 
-$   Copyright (C) 2008-2011 by Embedded and Real-Time Systems Laboratory
+$   Copyright (C) 2008-2015 by Embedded and Real-Time Systems Laboratory
 $               Graduate School of Information Science, Nagoya Univ., JAPAN
 $  
 $   上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -36,9 +36,27 @@ $   に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
 $   アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
 $   の責任を負わない．
 $ 
-$   @(#) $Id: kernel_check.tf 801 2011-05-03 13:54:23Z ertl-honda $
+$   @(#) $Id: kernel_check.tf 1087 2015-02-03 01:04:34Z ertl-honda $
 $  
 $ =====================================================================
+
+$
+$  データセクションのLMAからVMAへのコピー
+$
+$FOREACH lma LMA.ORDER_LIST$
+	$start_data = SYMBOL(LMA.START_DATA[lma])$
+	$end_data = SYMBOL(LMA.END_DATA[lma])$
+	$start_idata = SYMBOL(LMA.START_IDATA[lma])$
+	$IF !LENGTH(start_data)$
+		$ERROR$$FORMAT(_("symbol '%1%' not found"), LMA.START_DATA[lma])$$END$
+	$ELIF !LENGTH(end_data)$
+		$ERROR$$FORMAT(_("symbol '%1%' not found"), LMA.END_DATA[lma])$$END$
+	$ELIF !LENGTH(start_idata)$
+		$ERROR$$FORMAT(_("symbol '%1%' not found"), LMA.START_IDATA[lma])$$END$
+	$ELSE$
+		$BCOPY(start_idata, start_data, end_data - start_data)$
+	$END$
+$END$
 
 $ 
 $  関数の先頭番地のチェック
@@ -70,7 +88,7 @@ $	// タスクとタスク例外処理ルーチンの先頭番地のチェック
 $	// 周期ハンドラの先頭番地のチェック
 	$cycinib = SYMBOL("_kernel_cycinib_table")$
 	$FOREACH cycid CYC.ID_LIST$
-		$cychdr = PEEK(cycinib + offsetof_CYCINIB_cychdr, 4)$
+		$cychdr = PEEK(cycinib + offsetof_CYCINIB_cychdr, sizeof_FP)$
 		$IF CHECK_FUNC_ALIGN && (cychdr & (CHECK_FUNC_ALIGN - 1)) != 0$
 			$ERROR CYC.TEXT_LINE[cycid]$E_PAR: 
 				$FORMAT(_("%1% `%2%\' of `%3%\' in %4% is not aligned"),
@@ -87,7 +105,7 @@ $	// 周期ハンドラの先頭番地のチェック
 $	// アラームハンドラの先頭番地のチェック
 	$alminib = SYMBOL("_kernel_alminib_table")$
 	$FOREACH almid ALM.ID_LIST$
-		$almhdr = PEEK(alminib + offsetof_ALMINIB_almhdr, 4)$
+		$almhdr = PEEK(alminib + offsetof_ALMINIB_almhdr, sizeof_FP)$
 		$IF CHECK_FUNC_ALIGN && (almhdr & (CHECK_FUNC_ALIGN - 1)) != 0$
 			$ERROR ALM.TEXT_LINE[almid]$E_PAR: 
 				$FORMAT(_("%1% `%2%\' of `%3%\' in %4% is not aligned"),
@@ -132,12 +150,12 @@ $	// 非タスクコンテキスト用のスタック領域の先頭番地のチェック
 	$FOREACH prcid RANGE(1, TNUM_PRCID)$
 		$istk = PEEK(istk_table, sizeof_STK_T_prt)$
 		$IF CHECK_STACK_ALIGN && (istk & (CHECK_STACK_ALIGN - 1)) != 0$
-			$ERROR ICE.TEXT_LINE[1]$E_PAR: 
+			$ERROR ICS.TEXT_LINE[1]$E_PAR: 
 				$FORMAT(_("%1% `%2%\' in %3% is not aligned"),
 				"istk", ICS.ISTK[1], "DEF_ICS")$$END$
 		$END$
 		$IF CHECK_STACK_NONNULL && istk == 0$
-			$ERROR ICE.TEXT_LINE[1]$E_PAR: 
+			$ERROR ICS.TEXT_LINE[1]$E_PAR: 
 				$FORMAT(_("%1% `%2%\' in %3% is null"),
 				"istk", ICS.ISTK[1], "DEF_ICS")$$END$
 		$END$

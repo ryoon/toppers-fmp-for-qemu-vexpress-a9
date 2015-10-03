@@ -4,7 +4,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2004-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2004-2015 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -36,7 +36,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: sil.h 792 2011-03-10 14:18:33Z ertl-honda $
+ *  @(#) $Id: sil.h 1087 2015-02-03 01:04:34Z ertl-honda $
  */
 
 /*
@@ -89,13 +89,13 @@ extern void	sil_dly_nse(ulong_t dlytim) throw();
  */
 #ifndef TOPPERS_SIL_REV_ENDIAN_UINT16
 #define	TOPPERS_SIL_REV_ENDIAN_UINT16(data) \
-				((((data) & 0xff) << 8) | (((data) >> 8) & 0xff))
+				((((data) & 0xffU) << 8) | (((data) >> 8) & 0xffU))
 #endif /* TOPPERS_SIL_REV_ENDIAN_UINT16 */
 
 #ifndef TOPPERS_SIL_REV_ENDIAN_UINT32
 #define	TOPPERS_SIL_REV_ENDIAN_UINT32(data) \
-				((((data) & 0xff) << 24) | (((data) & 0xff00) << 8) \
-					| (((data) >> 8) & 0xff00) | (((data) >> 24) & 0xff))
+				((((data) & 0xffU) << 24) | (((data) & 0xff00U) << 8) \
+					| (((data) >> 8) & 0xff00U) | (((data) >> 24) & 0xffU))
 #endif /* TOPPERS_SIL_REV_ENDIAN_UINT32 */
 
 /*
@@ -109,11 +109,11 @@ extern void	sil_dly_nse(ulong_t dlytim) throw();
 #ifdef UINT8_MAX
 
 Inline uint8_t
-sil_reb_mem(uint8_t *mem)
+sil_reb_mem(const uint8_t *mem)
 {
 	uint8_t	data;
 
-	data = *((volatile uint8_t *) mem);
+	data = *((const volatile uint8_t *) mem);
 	return(data);
 }
 
@@ -130,11 +130,11 @@ sil_wrb_mem(uint8_t *mem, uint8_t data)
  */
 
 Inline uint16_t
-sil_reh_mem(uint16_t *mem)
+sil_reh_mem(const uint16_t *mem)
 {
 	uint16_t	data;
 
-	data = *((volatile uint16_t *) mem);
+	data = *((const volatile uint16_t *) mem);
 	return(data);
 }
 
@@ -152,11 +152,11 @@ sil_wrh_mem(uint16_t *mem, uint16_t data)
 #ifndef TOPPERS_OMIT_SIL_REH_LEM
 
 Inline uint16_t
-sil_reh_lem(uint16_t *mem)
+sil_reh_lem(const uint16_t *mem)
 {
 	uint16_t	data;
 
-	data = *((volatile uint16_t *) mem);
+	data = *((const volatile uint16_t *) mem);
 	return(TOPPERS_SIL_REV_ENDIAN_UINT16(data));
 }
 
@@ -179,11 +179,11 @@ sil_wrh_lem(uint16_t *mem, uint16_t data)
 #ifndef TOPPERS_OMIT_SIL_REH_BEM
 
 Inline uint16_t
-sil_reh_bem(uint16_t *mem)
+sil_reh_bem(const uint16_t *mem)
 {
 	uint16_t	data;
 
-	data = *((volatile uint16_t *) mem);
+	data = *((const volatile uint16_t *) mem);
 	return(TOPPERS_SIL_REV_ENDIAN_UINT16(data));
 }
 
@@ -209,11 +209,11 @@ sil_wrh_bem(uint16_t *mem, uint16_t data)
  */
 
 Inline uint32_t
-sil_rew_mem(uint32_t *mem)
+sil_rew_mem(const uint32_t *mem)
 {
 	uint32_t	data;
 
-	data = *((volatile uint32_t *) mem);
+	data = *((const volatile uint32_t *) mem);
 	return(data);
 }
 
@@ -231,11 +231,11 @@ sil_wrw_mem(uint32_t *mem, uint32_t data)
 #ifndef TOPPERS_OMIT_SIL_REW_LEM
 
 Inline uint32_t
-sil_rew_lem(uint32_t *mem)
+sil_rew_lem(const uint32_t *mem)
 {
 	uint32_t	data;
 
-	data = *((volatile uint32_t *) mem);
+	data = *((const volatile uint32_t *) mem);
 	return(TOPPERS_SIL_REV_ENDIAN_UINT32(data));
 }
 
@@ -257,11 +257,11 @@ sil_wrw_lem(uint32_t *mem, uint32_t data)
 #ifndef TOPPERS_OMIT_SIL_REW_BEM
 
 Inline uint32_t
-sil_rew_bem(uint32_t *mem)
+sil_rew_bem(const uint32_t *mem)
 {
 	uint32_t	data;
 
-	data = *((volatile uint32_t *) mem);
+	data = *((const volatile uint32_t *) mem);
 	return(TOPPERS_SIL_REV_ENDIAN_UINT32(data));
 }
 
