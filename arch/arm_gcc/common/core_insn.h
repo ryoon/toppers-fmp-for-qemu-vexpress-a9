@@ -2,12 +2,12 @@
  *  TOPPERS/FMP Kernel
  *      Toyohashi Open Platform for Embedded Real-Time Systems/
  *      Flexible MultiProcessor Kernel
- * 
+ *
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2006-2010 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2006-2011 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
- * 
+ *
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
  *  ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
  *  変・再配布（以下，利用と呼ぶ）することを無償で許諾する．
@@ -30,25 +30,30 @@
  *      また，本ソフトウェアのユーザまたはエンドユーザからのいかなる理
  *      由に基づく請求からも，上記著作権者およびTOPPERSプロジェクトを
  *      免責すること．
- * 
+ *
  *  本ソフトウェアは，無保証で提供されているものである．上記著作権者お
  *  よびTOPPERSプロジェクトは，本ソフトウェアに関して，特定の使用目的
  *  に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
- * 
- *  @(#) $Id: core_insn.h 719 2010-10-11 04:08:15Z ertl-honda $
+ *
+ *  @(#) $Id: core_insn.h 955 2012-10-30 07:31:22Z ertl-honda $
  */
 
 
 /*
- *   コア依存の特殊命令のインライン関数定義（ARM用）
+ *   コア依存の特殊命令のインライン関数定義（ARM_GCC用）
  */
 
-#ifndef _CPU_INSN_H_
-#define _CPU_INSN_H_
+#ifndef CORE_INSN_H
+#define CORE_INSN_H
 
 #include "arm.h"
+
+/*
+ *  メモリが変更されることをコンパイラに伝えるためのマクロ
+ */
+#define ARM_MEMORY_CHANGED Asm("":::"memory")
 
 /*
  *  制御レジスタの操作関数
@@ -80,7 +85,7 @@ set_sr(uint32_t sr)
 
 /*
  * Thumb Mode では，mrs/msrが使用できないため，関数として，
- * ARM Mode に変更して実行する． 
+ * ARM Mode に変更して実行する．
  */
 /*
  *  ステータスレジスタ（CPSR）の現在値の読出し
@@ -93,4 +98,4 @@ extern uint32_t current_sr(void);
 extern void set_sr(uint32_t sr);
 
 #endif /* __thumb__ */
-#endif /* _CPU_INSN_H_ */
+#endif /* CORE_INSN_H */

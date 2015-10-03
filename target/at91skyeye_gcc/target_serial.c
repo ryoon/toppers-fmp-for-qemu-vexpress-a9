@@ -36,7 +36,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: target_serial.c 268 2009-05-19 08:24:34Z ertl-honda $
+ *  @(#) $Id: target_serial.c 926 2012-03-30 10:18:29Z ertl-honda $
  */
 
 /*
@@ -47,7 +47,7 @@
 #include <t_syslog.h>
 #include "at91skyeye.h"
 #include "target_serial.h"
-#include "target_syssvc.h"
+#include <target_syssvc.h>
 
 /*
  *  シリアルI/Oポート初期化ブロックの定義
@@ -261,10 +261,7 @@ sio_initialize(intptr_t exinf)
  */
 SIOPCB *
 at91skyeye_uart_opn_por(SIOPCB *p_siopcb, intptr_t exinf)
-{
-	const SIOPINIB  *p_siopinib;
-	p_siopinib = p_siopcb->p_siopinib;
-   
+{   
 	p_siopcb->exinf = exinf;
 	p_siopcb->getready = p_siopcb->putready = false;
 	p_siopcb->openflag = true;
@@ -312,9 +309,6 @@ sio_cls_por(SIOPCB *p_siopcb)
 	/*
 	 *  デバイス依存のクローズ処理．
 	 */
-	const SIOPINIB  *p_siopinib;
-
-	p_siopinib = p_siopcb->p_siopinib;
 	p_siopcb->openflag = false;
     
 	/*

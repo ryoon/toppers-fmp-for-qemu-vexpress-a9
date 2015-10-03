@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: target_support.S 801 2011-05-03 13:54:23Z ertl-honda $
+ *  @(#) $Id: target_support.S 881 2011-12-31 14:06:52Z ertl-honda $
  */
 
 /*
@@ -56,23 +56,23 @@
  *
  *  スタートアップモジュールの中で，メモリ初期化の前に呼び出される．
  */
-        .text
-        .align 2
-        .global hardware_init_hook
-hardware_init_hook:
+        ATEXT
+        AALIGN(2)
+        AGLOBAL(hardware_init_hook)
+ALABEL(hardware_init_hook)
         bx  lr
 
 
-        .text
-        .align 2
-        .global software_init_hook
-software_init_hook:
+        ATEXT
+        AALIGN(2)
+        AGLOBAL(software_init_hook)
+ALABEL(software_init_hook)
         bx  lr
 
-        .text
-        .align 2
-        .global software_term_hook
-software_term_hook:
+        ATEXT
+        AALIGN(2)
+        AGLOBAL(software_term_hook)
+ALABEL(software_term_hook)
         bx  lr
 
 
@@ -81,10 +81,10 @@ software_term_hook:
  *
  * IRQ 例外ベクタから呼び出される
  */
-    .text
-    .align 2
-    .global irq_handler
-irq_handler:
+    ATEXT
+    AALIGN(2)
+    AGLOBAL(irq_handler)
+ALABEL(irq_handler)
     /* 
      * IRQモードで実行される
      */
@@ -92,7 +92,7 @@ irq_handler:
      *  割込み前のモード(スーパーバイザーモード)へ
      *  移行し，コンテキストを保存する
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_IRQ_BIT) 
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_IRQ_BIT) 
     stmfd sp!, {r0-r3, ip, lr, pc} /* pcはダミー */
 
     /*
@@ -105,7 +105,7 @@ irq_handler:
      *  プロセッサ・細粒度ロックの場合はロックを取得しているかチェックして
      *  取得していればロックを解放する．
      */ 
-release_lock:
+ALABEL(release_lock)
     ldr   r3, [r2, #PCB_p_firstlock]  /* p_firstlock を取得 */
     cmp   r3, #0                      /* NULLなら終了       */
     beq   release_lock_end
@@ -124,20 +124,20 @@ release_lock:
     str   r3, [r0]                    /* ロックの解放                  */
     str   ip, [r1]
     str   lr, [r2, #PCB_p_secondlock]  /* p_secondlock をNULLに */
-release_lock_end:
+ALABEL(release_lock_end)
 #endif /* TTYPE_KLOCK != G_KLOCK */
 
     /*
      * spsrと戻り番地を取得するためにIRQモードへ
      */
-    msr   cpsr, #(CPSR_IRQ|CPSR_IRQ_BIT)
+    msr   cpsr_cxsf, #(CPSR_IRQ AOR CPSR_IRQ_BIT)
     sub   r0, lr, #4
     mrs   r1, spsr
 
     /*
      *  割込みハンドラ実行時のモード（スーパーバイザーモード）に
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_IRQ_BIT) 
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_IRQ_BIT) 
     str   r0, [sp, #0x18] /* 戻り番地をスタックに */
     stmfd sp!, {r1}       /* spsrをスタックに保存 */
     mov   lr, sp          /* この時点のスタックを復帰のため取得 */
@@ -156,7 +156,7 @@ release_lock_end:
      */
     ldr   sp, [r2, #PCB_istkpt]
 
-irq_handler_1:
+ALABEL(irq_handler_1)
     stmfd sp!, {lr}     /* 復帰用のスタックポインタの保存 */
 
     ldr   r1, =AIC_IVR
@@ -221,7 +221,7 @@ irq_handler_1:
     /* 
      * 割り込み許可
      */
-    msr   cpsr, #(CPSR_SVC)
+    msr   cpsr_cxsf, #(CPSR_SVC)
 
 #ifdef LOG_INH_ENTER
     stmfd sp!,{r0}
@@ -244,7 +244,7 @@ irq_handler_1:
     /*
      * カーネル管理の割込みを禁止する
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_IRQ_BIT)
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_IRQ_BIT)
     
     /*
      * 割込みクリア
@@ -294,9 +294,9 @@ irq_handler_1:
  * ターゲット依存の例外入口処理
  *
  */
-    .text
-    .global target_exc_handler
-target_exc_handler:
+    ATEXT
+    AGLOBAL(target_exc_handler)
+ALABEL(target_exc_handler)
     /*
      *  例外実行のモード（スーパーバイザーモード）に
      *  割込みロック状態，CPUロック状態はCPU例外発生時の
@@ -306,7 +306,7 @@ target_exc_handler:
      *    r1 : spsr
      *    r2 : 例外番号
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_FIQ_BIT|CPSR_IRQ_BIT) 
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_FIQ_BIT AOR CPSR_IRQ_BIT) 
     str   r0, [sp, #0x18] /* 戻り番地をスタックに */
     stmfd sp!, {r1}       /* spsrをスタックに保存 */    
     mov   lr, sp          /* この時点のスタックを復帰のため取得 */
@@ -333,7 +333,7 @@ target_exc_handler:
      * CPU例外である．ARMの場合は，SPSRのI/Fフラグのいずれかが'1'なら，
      * 該当する．
      */
-    tst   r1, #(CPSR_FIQ_BIT|CPSR_IRQ_BIT) 
+    tst   r1, #(CPSR_FIQ_BIT AOR CPSR_IRQ_BIT) 
     bne   target_kernel_unc_exc_handler /* カーネル管理外のCPU例外の処理へ */
 
     /*
@@ -351,7 +351,7 @@ target_exc_handler:
      */
     ldr   sp, [r0, #PCB_istkpt]
 
-target_exc_handler_1:    
+ALABEL(target_exc_handler_1)
     stmfd sp!, {lr}     /* 復帰用のスタックポインタの保存 */
 
     /*
@@ -380,7 +380,7 @@ target_exc_handler_1:
      * CPU管理外の例外ハンドラは別ルーチンで呼び出すため，単純にSVCモード
      * にするだけでよい．
      */
-    msr   cpsr, #(CPSR_SVC)
+    msr   cpsr_cxsf, #(CPSR_SVC)
 
 #ifdef LOG_EXC_ENTER
     stmfd sp!,{r1,r3}
@@ -398,7 +398,7 @@ target_exc_handler_1:
     mov   lr, pc
     bx    r1
 
-target_ret_exc:
+ALABEL(target_ret_exc)
     ldmfd sp!,{r0}       /* excno を復帰  */
 #ifdef LOG_EXC_LEAVE
     bl    log_exc_leave  /* log_exc_leaveを呼び出す */
@@ -407,10 +407,10 @@ target_ret_exc:
     /*
      * カーネル管理の割込みを禁止する
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_IRQ_BIT)
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_IRQ_BIT)
 
-    .global target_ret_int
-target_ret_int:
+    AGLOBAL(target_ret_int)
+ALABEL(target_ret_int)
     /*
      * 割込み優先度マスクを元に戻す
      */
@@ -457,7 +457,7 @@ target_ret_int:
  * カーネル管理外のCPU例外の出入口処理
  *
  */
-target_kernel_unc_exc_handler:
+ALABEL(target_kernel_unc_exc_handler)
 
     /*
      * 割込み発生時のコンテキストを判定
@@ -474,7 +474,7 @@ target_kernel_unc_exc_handler:
      */
     ldr   sp, [r0, #PCB_istkpt]
 
-target_kernel_unc_exc_handler_1:
+ALABEL(target_kernel_unc_exc_handler_1)
     stmfd sp!, {lr}     /* 復帰用のスタックポインタの保存 */
     
     /*
@@ -487,9 +487,9 @@ target_kernel_unc_exc_handler_1:
     * システム状態（コンテキストは除く）を，CPU例外発生時の状態へ
     */
     ldr   r0, [lr]             /* CPU例外発生前のCPSRの取得 */
-    and   r0, r0, #(CPSR_IRQ_BIT|CPSR_FIQ_BIT)
+    and   r0, r0, #(CPSR_IRQ_BIT AOR CPSR_FIQ_BIT)
     orr   r0, r0, #(CPSR_SVC)
-    msr   cpsr, r0
+    msr   cpsr_cxsf, r0
 
     /* 
      * CPU例外ハンドラの呼び出し
@@ -497,7 +497,7 @@ target_kernel_unc_exc_handler_1:
      */        
     mov   r0, r3
     mov   lr, pc
-    mov   pc, r1
+    bx    r1
 
     /*
      *  例外・割込みのネストカウント（excpt_nest_count)のデクリメント
@@ -517,5 +517,5 @@ target_kernel_unc_exc_handler_1:
      * CPU例外からの復帰
      */
     ldmfd sp!,{r1}              /* CPSRの復帰処理 */
-    msr   spsr, r1              /* 戻り先のcpsrをspsrに設定 */
+    msr   spsr_cxsf, r1         /* 戻り先のcpsrをspsrに設定 */
     ldmfd sp!,{r0-r3,ip,lr,pc}^ /* コンテキストの復帰，^付きなので、cpsr <- spsr */

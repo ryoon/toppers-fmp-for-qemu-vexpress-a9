@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2004-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2004-2012 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: trace_config.h 826 2011-07-07 07:13:16Z ertl-honda $
+ *  @(#) $Id: trace_config.h 911 2012-03-09 01:18:37Z ertl-honda $
  */
 
 /*
@@ -74,7 +74,7 @@
  *  トレース時刻の取得方法
  */
 #ifndef TRACE_GET_TIM
-#define TRACE_GET_TIM()		(my_current_time)
+#define TRACE_GET_TIM()		(get_my_current_time())
 #endif /* TRACE_GET_TIM */
 
 #ifndef TOPPERS_MACRO_ONLY

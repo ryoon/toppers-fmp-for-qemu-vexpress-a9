@@ -1,10 +1,10 @@
-$ 
+$
 $       オフセットファイル生成用テンプレートファイル（ARM用）
-$ 
+$
 
-$ 
+$
 $  オフセット値のマクロ定義の生成
-$ 
+$
 $DEFINE("TCB_p_tinib", offsetof_TCB_p_tinib)$
 $DEFINE("TCB_texptn", offsetof_TCB_texptn)$
 $DEFINE("TCB_sp", offsetof_TCB_sp)$
@@ -22,7 +22,7 @@ $DEFINE("PCB_dspflg", offsetof_PCB_dspflg)$
 
 
 
-$ 
+$
 $  ビットオフセット値等のマクロ定義の生成
-$ 
+$
 $DEFINE_BIT("TCB_enatex", sizeof_TCB, "B")$

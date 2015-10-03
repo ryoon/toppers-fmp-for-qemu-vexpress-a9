@@ -2,12 +2,12 @@
  *  TOPPERS/FMP Kernel
  *      Toyohashi Open Platform for Embedded Real-Time Systems/
  *      Flexible MultiProcessor Kernel
- * 
+ *
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2006-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2006-2012 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
- * 
+ *
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
  *  ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
  *  変・再配布（以下，利用と呼ぶ）することを無償で許諾する．
@@ -30,14 +30,14 @@
  *      また，本ソフトウェアのユーザまたはエンドユーザからのいかなる理
  *      由に基づく請求からも，上記著作権者およびTOPPERSプロジェクトを
  *      免責すること．
- * 
+ *
  *  本ソフトウェアは，無保証で提供されているものである．上記著作権者お
  *  よびTOPPERSプロジェクトは，本ソフトウェアに関して，特定の使用目的
  *  に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
- * 
- *  @(#) $Id: core_config.h 792 2011-03-10 14:18:33Z ertl-honda $
+ *
+ *  @(#) $Id: core_config.h 1067 2014-12-24 14:15:10Z ertl-honda $
  */
 
 
@@ -72,19 +72,43 @@
 /*
  *  CPUロックとするCPSRのパターン
  */
+#ifdef TOPPERS_MACRO_ONLY
+
+#ifdef TOPPERS_SAFEG_SECURE
+#define CPSR_CPULOCK     (CPSR_FIQ_BIT AOR CPSR_IRQ_BIT)
+#else  /* !TOPPERS_SAFEG_SECURE */
 #define CPSR_CPULOCK     (CPSR_IRQ_BIT)
+#endif /* TOPPERS_SAFEG_SECURE */
+
+#else /* !TOPPERS_MACRO_ONLY */
+
+#ifdef TOPPERS_SAFEG_SECURE
+#define CPSR_CPULOCK     (CPSR_FIQ_BIT|CPSR_IRQ_BIT)
+#else  /* !TOPPERS_SAFEG_SECURE */
+#define CPSR_CPULOCK     (CPSR_IRQ_BIT)
+#endif /* TOPPERS_SAFEG_SECURE */
+
+#endif /* TOPPERS_MACRO_ONLY */
+
 
 /*
  *  割込みロックとするCPSRのパターン
  */
+#ifdef TOPPERS_MACRO_ONLY
+#define CPSR_INTLOCK     (CPSR_FIQ_BIT AOR CPSR_IRQ_BIT)
+#else /* !TOPPERS_MACRO_ONLY */
 #define CPSR_INTLOCK     (CPSR_FIQ_BIT|CPSR_IRQ_BIT)
+#endif /* TOPPERS_MACRO_ONLY */
+
 
 /*
  *  CPSRに常にセットするパターン
  */
-#ifndef CPSR_ALWAYS_SET
+#ifdef TOPPERS_SAFEG_SECURE
+#define CPSR_ALWAYS_SET  CPSR_IRQ_BIT
+#else  /* !TOPPERS_SAFEG_SECURE */
 #define CPSR_ALWAYS_SET  0x00
-#endif  /* CPSR_ALWAYS_SET */
+#endif /* TOPPERS_SAFEG_SECURE */
 
 /*
  *  例外の番号
@@ -99,7 +123,7 @@
 
 /*
  *  例外の個数
- */  
+ */
 #define TNUM_EXCH   7
 
 #ifndef TOPPERS_MACRO_ONLY
@@ -112,7 +136,7 @@
 /*
  *  プロセッサの特殊命令のインライン関数定義
  */
-#include "core_insn.h"
+#include <core_insn.h>
 
 /*
  *  タスクコンテキストブロックの定義
@@ -126,11 +150,13 @@ typedef struct task_context_block {
  *  TOPPERS標準割込み処理モデルの実現
  *
  *  IRQをカーネル管理内，FIQをカーネル管理外の割込みとして扱う．
- * 
+ *
  *  ARM依存部では，TOPPERS標準割込み処理モデルのうち，CPUロック状態
  *  のみを取り扱う．割込み優先度マスク，割込み要求禁止フラグに関して
  *  は，各ターゲット依存部で取り扱う
  */
+
+#ifndef USE_GIC_CPULOCK
 
 /*
  *  コンテキストの参照
@@ -154,11 +180,11 @@ sense_context(void)
 	 */
 	saved_sr = current_sr();
 	set_sr(saved_sr | CPSR_CPULOCK | CPSR_ALWAYS_SET);
-	Asm("":::"memory");
+	ARM_MEMORY_CHANGED;
 	my_p_apcb = get_my_p_apcb();
 	tmp = my_p_apcb->excpt_nest_count;
 	set_sr(saved_sr);
-	Asm("":::"memory");
+	ARM_MEMORY_CHANGED;
 
 	return(tmp > 0U);
 }
@@ -170,7 +196,7 @@ Inline void
 x_lock_cpu(void)
 {
 	set_sr(current_sr() | CPSR_CPULOCK | CPSR_ALWAYS_SET);
-	Asm("":::"memory");
+	ARM_MEMORY_CHANGED;
 }
 
 #define t_lock_cpu()   x_lock_cpu()
@@ -182,7 +208,7 @@ x_lock_cpu(void)
 Inline void
 x_unlock_cpu(void)
 {
-	Asm("":::"memory");
+	ARM_MEMORY_CHANGED;
 	set_sr((current_sr() & (~CPSR_CPULOCK)) | CPSR_ALWAYS_SET);
 }
 
@@ -201,6 +227,8 @@ x_sense_lock(void)
 #define t_sense_lock()    x_sense_lock()
 #define i_sense_lock()    x_sense_lock()
 
+#endif /* USE_GIC_CPULOCK */
+
 /*
  *  タスクコンテキスト かつ CPUロック解除状態なら true
  */
@@ -209,7 +237,7 @@ sense_tskctx_unl(void)
 {
 	return((!sense_context() && !t_sense_lock()));
 }
-  
+
 /*
  *  非タスクコンテキスト かつ CPUロック解除状態なら true
  */
@@ -304,14 +332,6 @@ extern void    start_r(void);
 extern const FP* const p_exch_table[TNUM_PRCID];
 
 /*
- * CPU例外ハンドラの初期化
- */
-Inline void
-initialize_exception(void)
-{
-}
-
-/*
  *  CPU例外の発生した時のシステム状態の参照
  */
 
@@ -328,21 +348,23 @@ exc_sense_context(void *p_excinf)
 }
 
 /*
- *  CPU例外の発生した時の(モデル上の)割込み優先度マスクの参照
- */
-Inline PRI
-exc_get_ipm(void *p_excinf)
-{
-	return((PRI)(((exc_frame_t *)(p_excinf))->ipm));
-}
-
-/*
  *  CPU例外の発生した時のCPSRの取得
  */
 Inline uint32_t
 exc_get_sr(void *p_excinf)
 {
 	return(((exc_frame_t *)(p_excinf))->cpsr);
+}
+
+#ifndef USE_GIC_CPULOCK
+
+/*
+ *  CPU例外の発生した時の(モデル上の)割込み優先度マスクの参照
+ */
+Inline PRI
+exc_get_ipm(void *p_excinf)
+{
+	return((PRI)(((exc_frame_t *)(p_excinf))->ipm));
 }
 
 /*
@@ -363,9 +385,11 @@ exc_sense_int_lock(void *p_excinf)
 	return((exc_get_sr(p_excinf) & CPSR_INTLOCK) == CPSR_INTLOCK);
 }
 
+#endif /* USE_GIC_CPULOCK */
+
 /*
  *  CPU例外の発生した時のコンテキストと割込みのマスク状態の参照
- *  
+ *
  *  CPU例外の発生した時のシステム状態が，カーネル実行中でなく，タスクコ
  *  ンテキストであり，全割込みロック状態でなく，CPUロック状態でなく，割
  *  込み優先度マスク全解除状態である時にtrue，そうでない時にfalseを返す
@@ -400,7 +424,7 @@ extern void *vector_ref_tbl;
 
 /*
  *  例外ベクタから直接実行するハンドラを登録
- */ 
+ */
 extern void x_install_exc(EXCNO excno, FP exchdr);
 
 /*

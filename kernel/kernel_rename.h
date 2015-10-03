@@ -194,7 +194,6 @@
 #define p_pdqcb_table				_kernel_p_pdqcb_table
 #define pdqinib_table				_kernel_pdqinib_table
 #define tmax_mbxid					_kernel_tmax_mbxid
-#define mbxcb_table					_kernel_mbxcb_table
 #define p_mbxcb_table				_kernel_p_mbxcb_table
 #define mbxinib_table				_kernel_mbxinib_table
 #define tmax_mpfid					_kernel_tmax_mpfid
@@ -426,7 +425,6 @@
 #define _p_pdqcb_table				__kernel_p_pdqcb_table
 #define _pdqinib_table				__kernel_pdqinib_table
 #define _tmax_mbxid					__kernel_tmax_mbxid
-#define _mbxcb_table				__kernel_mbxcb_table
 #define _p_mbxcb_table				__kernel_p_mbxcb_table
 #define _mbxinib_table				__kernel_mbxinib_table
 #define _tmax_mpfid					__kernel_tmax_mpfid

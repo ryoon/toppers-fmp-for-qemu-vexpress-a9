@@ -37,7 +37,7 @@ $   に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
 $   アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
 $   の責任を負わない．
 $ 
-$   @(#) $Id: kernel.tf 848 2011-07-15 08:18:27Z ertl-honda $
+$   @(#) $Id: kernel.tf 1081 2015-01-06 06:59:00Z ertl-honda $
 $  
 $ =====================================================================
 
@@ -669,7 +669,6 @@ $	// メールボックス管理ブロックアクセステーブル
 	$NL$
 	};$NL$
 
-	MBXCB _kernel_mbxcb_table[TNUM_MBXID];$NL$
 $ELSE$
 	TOPPERS_EMPTY_LABEL(const MBXINIB, _kernel_mbxinib_table);$NL$
 	TOPPERS_EMPTY_LABEL(MBXCB* const, _kernel_p_mbxcb_table);$NL$

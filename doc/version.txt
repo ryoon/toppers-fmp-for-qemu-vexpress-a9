@@ -2,8 +2,8 @@
 		TOPPERS/FMPカーネル
 		変更履歴
 
-		対応バージョン: Release 1.2.0
-		最終更新: 2011年7月15日
+		対応バージョン: Release 1.2.3
+		最終更新: 2012年12月24日
 
 このドキュメントは，TOPPERS/FMPカーネルのRelease 0.A.0以降の変更履歴を，
 新しい方から順に記述したものである．
@@ -13,7 +13,7 @@
      Toyohashi Open Platform for Embedded Real-Time Systems/
      Flexible MultiProcessor Kernel
 
- Copyright (C) 2005-2011 by Embedded and Real-Time Systems Laboratory
+ Copyright (C) 2005-2014 by Embedded and Real-Time Systems Laboratory
              Graduate School of Information Science, Nagoya Univ., JAPAN
  
  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -45,7 +45,55 @@
  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  の責任を負わない．
  
- @(#) $Id: version.txt 860 2011-07-25 10:34:12Z ertl-honda $
+ @(#) $Id: version.txt 1070 2014-12-24 14:17:38Z ertl-honda $
+ ----------------------------------------------------------------------
+          TOPPERS/FMPカーネル
+        Release 1.2.1 から 1.2.3 への変更点
+        リリース日時 2014-12-24
+
+○変更点のリスト
+・./kernel/dataqueue.c
+	ipsnd_dtq()/ifsnd_dtq()において，ロックを全て解放する前に割込みを
+	許可するパスが存在していた問題を修正．
+  
+・./kernel/kernel.tf
+	使用していないデータ MBXCB _kernel_mbxcb_table[] を削除．    
+----------------------------------------------------------------------
+  
+         TOPPERS/FMPカーネル
+        Release 1.2.1 から 1.2.2 への変更点
+        リリース日時 2012-10-30
+
+○変更点のリスト
+・perlのバージョンアップ追従
+	doやgetopt.plがサポートされなくなったためスクリプトを変更．
+
+----------------------------------------------------------------------
+        TOPPERS/FMPカーネル
+        Release 1.2.0 から 1.2.1 への変更点
+        リリース日時 2012-3-30
+
+○変更点のリスト
+・システムログが使用するポート数と実際のポート数の整合性チェック
+  ・syslog.cでチェックするようにした．
+
+・複文をdefineする場合は，do {} while(false)で囲むよう修正
+
+・ARMCC対応
+	・ARM依存部がARMCCに対応した．
+  
+・システムログがグローバル方式時に宣言していたスピンロックを削除
+	・SILにより実現しているため不要なので削除
+
+・CygwinとWindowsのシステム時刻差異問題の対応
+	・Makefile で touch に -r を付加
+
+・テスト用ラベル追加マクロの追加
+	・タイミング依存テスト用に追加．
+
+・トレースログのディフォルトの時間取得方法の修正
+	・システムティックの取得方法が古かったため修正．
+
 ----------------------------------------------------------------------
         TOPPERS/FMPカーネル
         Release 1.1.1 から 1.2.0 への変更点

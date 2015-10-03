@@ -36,7 +36,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: target_stddef.h 4 2008-05-09 18:17:43Z ertl-honda $
+ *  @(#) $Id: target_stddef.h 881 2011-12-31 14:06:52Z ertl-honda $
  */
 
 /*
@@ -60,12 +60,12 @@
  *  開発環境で共通な定義
  */
 #define TOPPERS_STDINT_TYPE1
-#include "gcc/tool_stddef.h"
+#include "tool_stddef.h"
 
 /*
  *  コアで共通な定義
  */
-#include "arm_gcc/common/core_stddef.h"
+#include "core_stddef.h"
 
 
 #ifndef TOPPERS_MACRO_ONLY

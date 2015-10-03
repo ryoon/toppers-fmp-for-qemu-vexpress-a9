@@ -1,5 +1,5 @@
 /*
- *  @(#) $Id: target_cfg1_out.h 843 2011-07-15 03:17:19Z ertl-honda $
+ *  @(#) $Id: target_cfg1_out.h 881 2011-12-31 14:06:52Z ertl-honda $
  */
 
 /*
@@ -9,6 +9,6 @@
 /*
  *  コア依存のスタブの定義
  */
-#include "arm_gcc/common/core_cfg1_out.h"
+#include "core_cfg1_out.h"
 int main(void){return 1;}
 ID sil_loc_spn_prcid;

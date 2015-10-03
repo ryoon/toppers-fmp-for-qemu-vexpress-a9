@@ -1,0 +1,5 @@
+E_PACKAGE fmp_at91skyeye_gcc
+VERSION %date
+
+INCLUDE ../../MANIFEST
+../../cfg/cfg/cfg.exe

@@ -1,12 +1,12 @@
 /*
  *  TOPPERS Software
  *      Toyohashi Open Platform for Embedded Real-Time Systems
- * 
+ *
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2005-2008 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2005-2011 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
- * 
+ *
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
  *  ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
  *  変・再配布（以下，利用と呼ぶ）することを無償で許諾する．
@@ -29,14 +29,14 @@
  *      また，本ソフトウェアのユーザまたはエンドユーザからのいかなる理
  *      由に基づく請求からも，上記著作権者およびTOPPERSプロジェクトを
  *      免責すること．
- * 
+ *
  *  本ソフトウェアは，無保証で提供されているものである．上記著作権者お
  *  よびTOPPERSプロジェクトは，本ソフトウェアに関して，特定の使用目的
  *  に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
- * 
- *  @(#) $Id: start.S 734 2010-11-02 02:52:18Z ertl-honda $
+ *
+ *  @(#) $Id: start.S 955 2012-10-30 07:31:22Z ertl-honda $
  */
 
 /*
@@ -53,16 +53,15 @@
  */
 #define MAGIC_START 0x87654321
 
-    .text
-    .code 32
-    .align  2
-    .global start
-start:
+    ATEXT
+    AALIGN(2)
+    AGLOBAL(start)
+ALABEL(start)
     /*
      *  プロセッサモードの初期化
      *  スーパーバイザーモード，FIQ/IRQ禁止
      */
-    msr  cpsr, #(CPSR_SVC|CPSR_INTLOCK) 
+    msr  cpsr_cxsf, #(CPSR_SVC AOR CPSR_INTLOCK)
 
     /*
      *  スタックポインタと，フレームポインタの初期化
@@ -102,34 +101,36 @@ start:
     /*
      *  bssセクションのクリア
      */
-start_1:
-    ldr  r1, =__bss_start
-    ldr  r2, =__bss_end
+ALABEL(start_1)
+    ldr  r1, =BSS_START
+    ldr  r2, =BSS_END
     cmp  r1,r2
     bhs  start_3
     mov  r0,#0
-start_2:
+ALABEL(start_2)
     str  r0,[r1],#4
     cmp  r1, r2
     blo  start_2
 #endif /* TOPPERS_OMIT_BSS_INIT */
 
+ALABEL(start_3)
+#ifndef TOPPERS_OMIT_DATA_INIT
     /*
      *  dataセクションの初期化(ROM化対応)
-     *  __idata_start から __idata_end までを，__data_start 以降に
+     *  IDATA_START から IDATA_END までを，DATA_START 以降に
      *  コピーする
      */
-start_3:
-    ldr  r1, =__idata_start
-    ldr  r3, =__idata_end
+    ldr  r1, =IDATA_START
+    ldr  r3, =IDATA_END
     cmp  r1, r3
     bhs  start_5
-    ldr  r2, =__data_start
-start_4:
+    ldr  r2, =DATA_START
+ALABEL(start_4)
     ldr  r0, [r1],#4
     str  r0, [r2],#4
     cmp  r1, r3
     blo  start_4
+#endif /* TOPPERS_OMIT_DATA_INIT */
 
     /*
      *  software_init_hook を呼出し（0 でない場合）
@@ -138,7 +139,7 @@ start_4:
      *  理がある場合は，software_init_hook という関数を用意すれば
      *  よい．
      */
-start_5:
+ALABEL(start_5)
     ldr   r0, =software_init_hook
     cmp   r0, #0x00
     movne lr, pc
@@ -149,38 +150,38 @@ start_5:
      *
      *  sta_ker 以前にマスタプロセッサのみで行う必要のある初期化を実行
      */
-start_6:
+ALABEL(start_6)
     bl   target_mprc_initialize
 
     /*
      *  カーネルを起動する
      */
-start_7:
+ALABEL(start_7)
     ldr  r0, =start_sync
     ldr  r1, =MAGIC_START
     mov  r2, #0
-start_8:
+ALABEL(start_8)
     str  r1, [r0, r2]
     add  r2, r2, #4
     cmp  r2, #(TNUM_PRCID * 4)
     bne  start_8
-    sev
+
     /* マスタプロセッサ用のstart_syncを初期化 */
     my_core_index r1
-    str  r2, [r0, r1, asl #2]
+    str  r2, [r0, r1, lsl #2]
     bl   sta_ker
 
     /*
      *  マスタプロセッサ以外の初期化待ちルーチン
      */
-slave_wait:
+ALABEL(slave_wait)
     my_core_index r0
     ldr  r1, =start_sync
-slave_wait_1:
+ALABEL(slave_wait_1)
     ldr  r2, =MAGIC_START
-    ldr  r3, [r1, r0, asl #2]
+    ldr  r3, [r1, r0, lsl #2]
     cmp  r3, r2
     bne  slave_wait_1
     mov  r4, #0
-    str  r4, [r1, r0, asl #2]
+    str  r4, [r1, r0, lsl #2]
     bl   sta_ker

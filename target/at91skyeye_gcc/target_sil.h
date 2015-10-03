@@ -36,7 +36,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: target_sil.h 843 2011-07-15 03:17:19Z ertl-honda $
+ *  @(#) $Id: target_sil.h 881 2011-12-31 14:06:52Z ertl-honda $
  */
 
 /*
@@ -59,7 +59,7 @@
 /*
  *  ARMで共通な定義
  */
-#include "arm_gcc/common/core_sil.h"
+#include "core_sil.h"
 
 #ifndef TOPPERS_MACRO_ONLY
 
@@ -119,7 +119,7 @@ TOPPERS_sil_loc_spn(void)
 		goto retry;
 	}
 
-	Asm("":::"memory");
+	ARM_MEMORY_CHANGED;
 
 	sil_get_pid(&prcid);
 	TOPPERS_spn_var = prcid;
@@ -135,7 +135,7 @@ TOPPERS_sil_unl_spn(uint32_t irq_fiq_mask)
 {
 	TOPPERS_spn_var = 0;
 
-	Asm("":::"memory");
+	ARM_MEMORY_CHANGED;
 
 	*((volatile unsigned int *)TOPPERS_MUTEX_ID_REG) = TOPPERS_SIL_LOC_MUTEX_ID;
 	*((volatile unsigned int *)TOPPERS_MUTEX_CNT_REG) = 1;

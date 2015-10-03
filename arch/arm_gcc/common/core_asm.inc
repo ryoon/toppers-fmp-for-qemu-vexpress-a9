@@ -3,7 +3,7 @@
  *      Toyohashi Open Platform for Embedded Real-Time Systems/
  *      Flexible MultiProcessor Kernel
  *
- *  Copyright (C) 2009-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2011 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  *
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -35,41 +35,30 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  *
- *  @(#) $Id: core_pcb.h 955 2012-10-30 07:31:22Z ertl-honda $
+ *  @(#) $Id: core_config.h 1836 2010-07-09 15:31:28Z ertl-honda $
  */
+
+#ifndef TOPPERS_CORE_ASM_INC
+#define TOPPERS_CORE_ASM_INC
 
 /*
- *  プロセッサ依存プロセッサコントロールブロックモジュール（ARM用）
+ *  ディレクティブのマクロ定義
  */
-#ifndef TOPPERS_PRC_PCB_H
-#define TOPPERS_PRC_PCB_H
-
-#ifndef TOPPERS_MACRO_ONLY
+#define ASECTION(name) .section name,"a"
+#define ATEXT          .text
+#define AGLOBAL(name)  .global name
+#define AALIGN(x)      .align x
+#define ALONG          .long
+#define ALABEL(label)  label:
+#define AOR            |
 
 /*
- *  前方参照
+ *  セクション情報
  */
-typedef struct processor_control_block PCB;
+#define DATA_START  __data_start
+#define IDATA_START __idata_start
+#define IDATA_END   __idata_end
+#define BSS_START   __bss_start
+#define BSS_END     __bss_end
 
-/*
- *  ARM依存プロセッサコントロールブロック
- */
-typedef struct arm_processor_control_block{
-	/*
-	 *  割込み・例外のネスト回数
-	 */
-	uint32_t excpt_nest_count;
-
-	/*
-	 *  非タスクコンテキスト用のスタックの初期値
-	 */
-	STK_T* istkpt;
-
-	/*
-	 *  CPU例外ハンドラテーブルへのポインタ
-	 */
-	const FP* p_exch_tbl;
-}APCB;
-
-#endif /* TOPPERS_MACRO_ONLY */
-#endif /* TOPPERS_PRC_PCB_H */
+#endif /* TOPPERS_CORE_ASM_INC */

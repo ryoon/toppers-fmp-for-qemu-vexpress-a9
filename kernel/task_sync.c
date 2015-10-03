@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2005-2010 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2005-2012 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: task_sync.c 737 2010-11-17 01:41:13Z ertl-honda $
+ *  @(#) $Id: task_sync.c 905 2012-02-27 09:01:23Z ertl-honda $
  */
 
 /*
@@ -403,6 +403,7 @@ rel_wai(ID tskid)
 			 *   オブジェクトロック -> タスクロック
 			 * の順でロックを取得 
 			 */
+			TEST_G_LABEL("_test_rel_wai");
 		  retry:
 			t_acquire_obj_lock(&GET_OBJLOCK(p_wobjcb));
 			if ((p_pcb = t_acquire_nested_tsk_lock(p_tcb, &GET_OBJLOCK(p_wobjcb))) == NULL){
@@ -488,6 +489,7 @@ irel_wai(ID tskid)
 			 *   オブジェクトロック -> タスクロック
 			 * の順でロックを取得 
 			 */
+			TEST_G_LABEL("_test_irel_wai");
 			t_acquire_obj_lock(&GET_OBJLOCK(p_wobjcb));
 			if ((p_pcb = t_acquire_nested_tsk_lock(p_tcb, &GET_OBJLOCK(p_wobjcb))) == NULL){
 				goto retry;

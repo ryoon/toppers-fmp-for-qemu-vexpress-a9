@@ -3,7 +3,7 @@
  *      Toyohashi Open Platform for Embedded Real-Time Systems/
  *      Flexible MultiProcessor Kernel
  * 
- *  Copyright (C) 2007-2010 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2007-2011 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -35,7 +35,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: target_config.h 739 2010-11-24 04:14:37Z ertl-honda $
+ *  @(#) $Id: target_config.h 926 2012-03-30 10:18:29Z ertl-honda $
  */
 
 /*
@@ -108,6 +108,11 @@
  *  ベクタールーチンを持たない場合のベクターアドレスの先頭番地
  */ 
 #define VECTOR_START  0x00
+
+/*
+ *  データセクションの初期化をしない
+ */
+#define TOPPERS_OMIT_DATA_INIT
 
 /*
  *  FMPカーネル動作時のメモリマップと関連する定義
@@ -243,9 +248,14 @@ x_initialize_obj_lock(LOCK *p_obj_lock)
  *  割込み番号の範囲の判定
  *
  *  ビットパターンを求めるのを容易にするために，8は欠番になっている．
+ *  intnoは符号無し変数なので，TMIN_INTNOが0の場合は下限チェックはしない．
  */
+#if TMIN_INTNO == 0
+#define VALID_INTNO(prcid, intno) (((INTNO_MASK(intno)) <= TMAX_INTNO) && (INTNO_PRCID(intno) == prcid))
+#else /* !TMIN_INTNO == 0 */
 #define VALID_INTNO(prcid, intno) (((TMIN_INTNO <= (INTNO_MASK(intno)) && (INTNO_MASK(intno)) <= TMAX_INTNO)) \
                                     && (INTNO_PRCID(intno) == prcid))
+#endif /* TMIN_INTNO == 0 */
 #define VALID_INTNO_DISINT(prcid, intno)	VALID_INTNO(prcid, intno)
 #define VALID_INTNO_CFGINT(prcid, intno)	VALID_INTNO(prcid, intno)
 
@@ -500,7 +510,7 @@ extern void default_int_handler(void);
 /*
  *  コア依存モジュール（ARM用）
  */
-#include "arm_gcc/common/core_config.h"
+#include "core_config.h"
 
 #ifndef TOPPERS_MACRO_ONLY
 /*
@@ -518,7 +528,7 @@ x_acquire_lock(LOCK *p_lock)
 		sil_wrw_mem((void *)MUTEX_ID_REG, *p_lock);
 		if(sil_rew_mem((void *)MUTEX_CNT_REG) == 1){
 			/* ロック取得成功 */
-			Asm("":::"memory");
+			ARM_MEMORY_CHANGED;
 			return;
 		}
 		/* 割込みの許可 */
@@ -544,7 +554,7 @@ x_acquire_nested_lock(LOCK *p_lock)
 		sil_wrw_mem((void *)MUTEX_ID_REG, *p_lock);
 		if(sil_rew_mem((void *)MUTEX_CNT_REG) == 1){
 			/* ロック取得成功 */
-			Asm("":::"memory");
+			ARM_MEMORY_CHANGED;
 			return(false);
 		}
 		/* 割込みの許可 */
@@ -574,7 +584,7 @@ x_acquire_nested_lock(LOCK *p_lock)
 Inline void
 x_release_lock(LOCK *p_lock)
 {
-	Asm("":::"memory");
+	ARM_MEMORY_CHANGED;
 	sil_wrw_mem((void *)MUTEX_ID_REG, *p_lock);
 	sil_wrw_mem((void *)MUTEX_CNT_REG, 1);
 }
@@ -589,7 +599,7 @@ x_acquire_lock_without_preemption(LOCK *p_lock)
 		sil_wrw_mem((void *)MUTEX_ID_REG, *p_lock);
 		if(sil_rew_mem((void *)MUTEX_CNT_REG) == 1){
 			/* ロック取得成功 */
-			Asm("":::"memory");
+			ARM_MEMORY_CHANGED;
 			return;
 		}
 	}
@@ -645,7 +655,7 @@ x_try_lock_spin(SPNLOCK *p_spn_lock)
 	}
 	else {
 		/* 成功 */
-		Asm("":::"memory");
+		ARM_MEMORY_CHANGED;
 		return(false);
 	}
 }

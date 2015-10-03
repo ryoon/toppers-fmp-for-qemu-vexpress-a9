@@ -1,9 +1,10 @@
 PACKAGE fmp_arch_arm_gcc
 
-MANIFEST
-Makefile.target
 at91skyeye.h
 at91skyeye.ld
+E_PACKAGE
+Makefile.target
+MANIFEST
 skyeye_pe1.conf
 skyeye_pe2.conf
 skyeye_pe3.conf
@@ -14,6 +15,7 @@ target.tf
 target_asm.inc
 target_cfg1_out.h
 target_check.tf
+target_common.tf
 target_config.c
 target_config.h
 target_def.csv

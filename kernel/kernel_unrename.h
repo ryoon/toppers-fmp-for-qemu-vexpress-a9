@@ -195,7 +195,6 @@
 #undef p_pdqcb_table
 #undef pdqinib_table
 #undef tmax_mbxid
-#undef mbxcb_table
 #undef p_mbxcb_table
 #undef mbxinib_table
 #undef tmax_mpfid
@@ -427,7 +426,6 @@
 #undef _p_pdqcb_table
 #undef _pdqinib_table
 #undef _tmax_mbxid
-#undef _mbxcb_table
 #undef _p_mbxcb_table
 #undef _mbxinib_table
 #undef _tmax_mpfid

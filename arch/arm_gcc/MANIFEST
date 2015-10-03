@@ -7,6 +7,7 @@ README.txt
 common/Makefile.core
 common/arm.h
 common/core.tf
+common/core_asm.inc
 common/core_cfg1_out.h
 common/core_check.tf
 common/core_config.c

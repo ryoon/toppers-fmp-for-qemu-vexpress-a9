@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: kernel.h 792 2011-03-10 14:18:33Z ertl-honda $
+ *  @(#) $Id: kernel.h 1070 2014-12-24 14:17:38Z ertl-honda $
  */
 
 /*
@@ -486,7 +486,7 @@ extern bool_t	xsns_xpn(void *p_excinf) throw();
 #define TKERNEL_MAKER	UINT_C(0x0118)	/* カーネルのメーカーコード */
 #define TKERNEL_PRID	UINT_C(0x0008)	/* カーネルの識別番号 */
 #define TKERNEL_SPVER	UINT_C(0xf513)	/* カーネル仕様のバージョン番号 */
-#define TKERNEL_PRVER	UINT_C(0x1020)	/* カーネルのバージョン番号 */
+#define TKERNEL_PRVER	UINT_C(0x1023)	/* カーネルのバージョン番号 */
 
 /*
  *  キューイング回数の最大値

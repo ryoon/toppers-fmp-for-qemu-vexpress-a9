@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: syslog.c 661 2010-07-29 10:10:12Z ertl-honda $
+ *  @(#) $Id: syslog.c 900 2012-02-24 05:25:12Z ertl-honda $
  */
 
 /*
@@ -150,6 +150,13 @@
 #ifndef SEC_PRC4_SYSLOG_END
 #define SEC_PRC4_SYSLOG_END
 #endif /* SEC_PRC4_SYSLOG_END */
+
+/*
+ *  ポート数のチェック
+ */
+#if !defined(G_SYSLOG) && (TNUM_PORT < TNUM_PRCID)
+#error !defined(G_SYSLOG) && (TNUM_PORT < TNUM_PRCID) : check G_SYSLOG and TNUM_PORT !
+#endif /* defined(G_SYSLOG) && (TNUM_PORT == 1) */
 
 /*
  *  システムログコントロールブロック

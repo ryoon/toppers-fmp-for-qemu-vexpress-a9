@@ -3,7 +3,7 @@
  *      Toyohashi Open Platform for Embedded Real-Time Systems/
  *      Flexible MultiProcessor Kernel
  * 
- *  Copyright (C) 2007 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2007-2011 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -35,11 +35,13 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: target_asm.inc 372 2009-09-10 01:58:34Z ertl-honda $
+ *  @(#) $Id: target_asm.inc 881 2011-12-31 14:06:52Z ertl-honda $
  */
 
 #ifndef TOPPERS_TARGET_ASM_INC
 #define TOPPERS_TARGET_ASM_INC
+
+#include "arm_gcc/common/core_asm.inc"
 
 #define PRC_ID_ADDR_ASM 0xFFFFFFE0
 

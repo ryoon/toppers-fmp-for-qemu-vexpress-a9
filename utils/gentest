@@ -3,7 +3,7 @@
 #  TOPPERS Software
 #      Toyohashi Open Platform for Embedded Real-Time Systems
 # 
-#  Copyright (C) 2007-2008 by Embedded and Real-Time Systems Laboratory
+#  Copyright (C) 2007-2014 by Embedded and Real-Time Systems Laboratory
 #              Graduate School of Information Science, Nagoya Univ., JAPAN
 # 
 #  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -35,12 +35,15 @@
 #  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
 #  の責任を負わない．
 # 
-#  @(#) $Id: gentest 668 2010-08-02 02:00:32Z ertl-honda $
+#  $Id: gentest 1072 2014-12-24 14:27:05Z ertl-honda $
 # 
 
 #
 #		テストプログラム生成ツール
 #
+
+use open ":encoding(euc-jp)";
+use encoding "euc-jp";
 
 $infile = $ARGV[0];
 
@@ -55,6 +58,7 @@ $infile = $ARGV[0];
 	"ref_pdq" => 2,
 	"ref_mbx" => 2,
 	"ref_mtx" => 2,
+	"ref_mbf" => 2,
 	"ref_mpf" => 2,
 	"get_tim" => 1,
 	"get_utm" => 1,
@@ -76,6 +80,7 @@ $infile = $ARGV[0];
 	"ref_pdq" => "T_RPDQ",
 	"ref_mbx" => "T_RMBX",
 	"ref_mtx" => "T_RMTX",
+	"ref_mbf" => "T_RMBF",
 	"ref_mpf" => "T_RMPF",
 	"get_tim" => "SYSTIM",
 	"get_utm" => "SYSUTM",
@@ -85,6 +90,8 @@ $infile = $ARGV[0];
 	"iget_tid" => "ID",
 	"get_ipm" => "PRI",
 );
+
+$last_check_point = 0;
 
 sub gen_var_def {
 	local($svc_call) = @_;
@@ -108,173 +115,250 @@ sub gen_svc_call {
 	local($svc_call, $error_code_string) = @_;
 	local($error_code);
 
-	$TASKCODE{$tskid} .= $indentstr;
-	$TASKCODE{$tskid} .= sprintf("ercd = %s;\n", $svc_call);
-	do gen_var_def($svc_call);
+	${$TASKVAR{$tskid}}{"ER_UINT"} = "ercd";
+
+	push(@{$TASKCODE{$tskid}{$tskcnt}}, sprintf("\tercd = %s;", $svc_call));
+	gen_var_def($svc_call);
 
 	if ($error_code_string eq "") {
-		$TASKCODE{$tskid} .= $indentstr;
-		$TASKCODE{$tskid} .= sprintf("check_ercd(ercd, E_OK);\n");
+		push(@{$TASKCODE{$tskid}{$tskcnt}},
+								sprintf("\tcheck_ercd(ercd, E_OK);"), "");
 	}
 	elsif ($error_code_string =~ /^\-\>\s*noreturn$/) {
-		# do nothing.
+		push(@{$TASKCODE{$tskid}{$tskcnt}}, "");
 	}
 	else {
 		$error_code = $error_code_string;
-		$error_code =~ s/^\-\>\s*([A-Z_]*)$/$1/;
-		$TASKCODE{$tskid} .= $indentstr;
-		$TASKCODE{$tskid} .= sprintf("check_ercd(ercd, %s);\n", $error_code);
+		$error_code =~ s/^\-\>\s*([A-Za-z0-9_]*)$/$1/;
+		push(@{$TASKCODE{$tskid}{$tskcnt}},
+						sprintf("\tcheck_ercd(ercd, %s);", $error_code), "");
 	}
 }
 
 sub parse_line {
 	local($line) = @_;
 
+	while ($line =~ s/\\$//) {
+		$line1 = <INFILE>;
+		$output_line .= $line1;
+		chomp $line1;
+		$line1 =~ s/^\s*\*\s*//;
+		$line1 =~ s/\s*\/\/.*$//;
+		$line1 =~ s/\s*\.\.\..*$//;
+		$line .= $line1;
+	}
+
 	if ($line =~ /^\.\./) {
 		# do nothing.
 	}
-	elsif ($line =~ /^==\s*((TASK|ALM)[0-9]+)(.*)$/) {
-		$startflag = 1;
+	elsif ($line =~ /^==\s*((TASK|ALM|CPUEXC|EXTSVC)[0-9]*)(.*)$/) {
+		$procflag = 1;
 		$tskid = $1;
 		$line2 = $3;
-		if ($line2 =~ /^\-([0-9]+)/) {
-			$tskcount = $1;
-			$indentstr = "\t\t";
-			if (!$TASKCOUNT{$tskid}) {
-				$TASKCOUNT{$tskid} = 0;
-				if ($tskid =~ /^TASK([0-9]+)$/) {
+		if ($line2 =~ /^\-TEX(.*)$/) {
+			$tskid = $tskid."-TEX";
+			$line2 = $1;
+		}
+		if ($line2 =~ /^\-([0-9]+)(.*)$/) {
+			$tskcnt = $1;
+			if (!$TASKCOUNTVAR{$tskid}) {
+				if ($tskid =~ /^TASK([0-9]*)$/) {
 					$countvar = "task$1_count";
 				}
-				elsif ($tskid =~ /^ALM([0-9]+)$/) {
+				elsif ($tskid =~ /^TASK([0-9]*)-TEX$/) {
+					$countvar = "tex_task$1_count";
+				}
+				elsif ($tskid =~ /^ALM([0-9]*)$/) {
 					$countvar = "alarm$1_count";
+				}
+				elsif ($tskid =~ /^CPUEXC([0-9]*)$/) {
+					$countvar = "cpuexc$1_count";
+				}
+				elsif ($tskid =~ /^EXTSVC([0-9]*)$/) {
+					$countvar = "extsvc$1_count";
 				}
 				$TASKCOUNTVAR{$tskid} = $countvar;
 			}
-			if ($tskcount == $TASKCOUNT{$tskid} + 1) {
-				if ($tskcount > 1) {
-					$TASKCODE{$tskid} .= "\n".$indentstr;
-					$TASKCODE{$tskid} .= sprintf("check_point(0);\n\n");
-				}
-				$TASKCOUNT{$tskid} = $tskcount;
-				$TASKCODE{$tskid} .= sprintf("\tcase %d:", $tskcount);
-			}
-			elsif ($tskcount != $TASKCOUNT{$tskid}) {
-				printf STDERR "Subtask count error: %d-%d\n",$tskid,$tskcount;
-			}
 		}
 		else {
-			$tskcount = "";
-			$indentstr = "\t";
+			$tskcnt = "";
+		}
+		if ($startflag) {
+			push(@{$TASKCODE{$tskid}{$tskcnt}}, "\ttest_start(__FILE__);");
+			push(@{$TASKCODE{$tskid}{$tskcnt}}, "");
+			$startflag = 0;
 		}
 	}
-	elsif (!$startflag) {
+	elsif (!$procflag) {
 		# do nothing.
 	}
-	elsif ($line =~ /^(assert\(.*\))$/) {
-		$assert_string = $1;
-		$TASKCODE{$tskid} .= $indentstr;
-		$TASKCODE{$tskid} .= sprintf("check_%s;\n", $assert_string);
-	}
-	elsif ($line =~ /^call\((.*)\)$/) {
-		$call_string = $1;
-		$TASKCODE{$tskid} .= "\n".$indentstr;
-		$TASKCODE{$tskid} .= sprintf("%s;\n", $call_string);
-	}
-	elsif ($line =~ /^([0-9]+)\:\s*MISSING$/) {
-		$check_no = $1;
-		$TASKCODE{$tskid} .= "\n".$indentstr;
-		$TASKCODE{$tskid} .= sprintf("check_point(%d);\n", $check_no);
-	}
-	elsif ($line =~ /^([0-9]+)\:\s*RETURN$/) {
-		$check_no = $1;
-		$TASKCODE{$tskid} .= "\n".$indentstr;
-		$TASKCODE{$tskid} .= sprintf("check_point(%d);\n", $check_no);
-		$TASKCODE{$tskid} .= $indentstr;
-		$TASKCODE{$tskid} .= "return;\n";
-	}
-	elsif ($line =~ /^RETURN$/) {
-		$TASKCODE{$tskid} .= "\n".$indentstr;
-		$TASKCODE{$tskid} .= "return;\n";
-	}
-	elsif ($line =~ /^([0-9]+)\:\s*END$/) {
-		$check_no = $1;
-		$TASKCODE{$tskid} .= "\n".$indentstr;
-		$TASKCODE{$tskid} .= sprintf("check_finish(%d);\n", $check_no);
-		$endflag = 1;
-	}
-	elsif ($line =~ /^([0-9]+)\:\s*([a-z_]+\(.*\))\s*(\-\>\s*[A-Za-z_]*)?\s*$/) {
-		$check_no = $1;
-		$svc_call = $2;
-		$error_code_string = $3;
-		$TASKCODE{$tskid} .= "\n".$indentstr;
-		$TASKCODE{$tskid} .= sprintf("check_point(%d);\n", $check_no);
-		do gen_svc_call($svc_call, $error_code_string);
-	}
-	elsif ($line =~ /^([a-z_]+\(.*\))\s*(\-\>\s*[A-Za-z_]*)?\s*$/) {
-		$svc_call = $1;
-		$error_code_string = $2;
-		$TASKCODE{$tskid} .= "\n";
-		do gen_svc_call($svc_call, $error_code_string);
+	elsif ($line =~ /^([0-9]+\:)\s*END$/) {
+		$check_str = $1;
+		$check_no = ++$last_check_point;
+		push(@{$TASKCODE{$tskid}{$tskcnt}},
+								sprintf("\tcheck_finish(%d);", $check_no));
+		$procflag = 0;
+		$output_line =~ s/$check_str/$check_no:/;
 	}
 	else {
-		print STDERR "Error: ",$line,"\n";
+		if ($line =~ /^([0-9]+\:)\s*(.*)/) {
+			$check_str = $1;
+			$line = $2;
+			$check_no = ++$last_check_point;
+			push(@{$TASKCODE{$tskid}{$tskcnt}},
+								sprintf("\tcheck_point(%d);", $check_no));
+			$output_line =~ s/$check_str/$check_no:/;
+		}
+		if ($line =~ /^(assert\(.*\))$/) {
+			$assert_string = $1;
+			push(@{$TASKCODE{$tskid}{$tskcnt}},
+								sprintf("\tcheck_%s;", $assert_string), "");
+		}
+		elsif ($line =~ /^(state(_i)?\(.*\))$/) {
+			$state_string = $1;
+			push(@{$TASKCODE{$tskid}{$tskcnt}},
+								sprintf("\tcheck_%s;", $state_string), "");
+		}
+		elsif ($line =~ /^call\((.*)\)$/ || $line =~ /^DO\((.*)\)$/) {
+			$call_string = $1;
+			push(@{$TASKCODE{$tskid}{$tskcnt}},
+									sprintf("\t%s;", $call_string), "");
+		}
+		elsif ($line =~ /^MISSING$/) {
+			push(@{$TASKCODE{$tskid}{$tskcnt}}, "");
+		}
+		elsif ($line =~ /^RETURN((\(.*\))?)$/) {
+			$return_string = $1;
+			push(@{$TASKCODE{$tskid}{$tskcnt}},
+									"\treturn".$return_string.";", "");
+		}
+		elsif ($line =~ /^GOTO\((.*)\)$/) {
+			$goto_string = $1;
+			push(@{$TASKCODE{$tskid}{$tskcnt}},
+									sprintf("\tgoto %s;", $goto_string), "");
+		}
+		elsif ($line =~ /^LABEL\((.*)\)$/) {
+			$label_string = $1;
+			$indent_string = $indentstr;
+			$indent_string =~ s/\t$//;
+			push(@{$TASKCODE{$tskid}{$tskcnt}},
+									sprintf("%s:", $label_string));
+		}
+		elsif ($line =~ /^([a-z_]+\(.*\))\s*(\-\>\s*[A-Za-z0-9_]*)?\s*$/) {
+			$svc_call = $1;
+			$error_code_string = $2;
+			gen_svc_call($svc_call, $error_code_string);
+		}
+		else {
+			print STDERR "Error: ",$line,"\n";
+		}
 	}
 }
 
 #
 #  スクリプトファイル読込み処理
 #
-$startflag = 0;
-$endflag = 0;
+$procflag = 0;
+$startflag = 1;
+$outflag = 1;
 open(INFILE, $infile) || die "Cannot open $infile";
-while (($line = <INFILE>) && !$endflag) {
+while (($line = <INFILE>) && $outflag) {
+	$output_line = $line;
 	chomp $line;
 	$line =~ s/^\s*\*\s*//;
 	$line =~ s/\s*\/\/.*$//;
 	$line =~ s/\s*\.\.\..*$//;
-	next unless($line);
-	do parse_line($line);
+	if ($line) {
+		parse_line($line);
+	}
+	print $output_line;
+	if ($output_line =~ /DO NOT DELETE THIS LINE/) {
+		$outflag = 0;
+	}
 }
 close(INFILE);
+
+#
+#  タスクの変数定義のコード出力
+#
+sub output_task_vardef {
+	my($tskid) = @_;
+
+	foreach my $typename (keys(%{$TASKVAR{$tskid}})) {
+		print "\t",$typename, (length($typename) < 4 ? "\t\t" : "\t"),
+								${$TASKVAR{$tskid}}{$typename},";\n";
+	}
+}
+
+#
+#  タスク本体のコード出力
+#
+sub output_task_body {
+	my($tskid) = @_;
+
+	foreach my $tskcnt (sort {$a <=> $b} (keys(%{$TASKCODE{$tskid}}))) {
+		printf "\tcase %d:\n", $tskcnt;
+		foreach my $line (@{$TASKCODE{$tskid}{$tskcnt}}) {
+			print "\t",$line if ($line);
+			print "\n";
+		}
+		printf "\t\tcheck_point(0);\n\n";
+	}
+}
 
 #
 #  タスクコードの出力
 #
 sub output_task {
-	if ($TASKCOUNT{$tskid}) {
+	if ($TASKCOUNTVAR{$tskid}) {
 		printf "\nstatic uint_t\t%s = 0;\n", $TASKCOUNTVAR{$tskid};
 	}
-	print "\nvoid\n";
-	if ($tskid =~ /^TASK([0-9]+)$/) {
+	if ($tskid =~ /^TASK([0-9]*)$/) {
+		print "\nvoid\n";
 		print "task$1(intptr_t exinf)\n";
 	}
-	elsif ($tskid =~ /^ALM([0-9]+)$/) {
+	elsif ($tskid =~ /^TASK([0-9]*)-TEX$/) {
+		print "\nvoid\n";
+		print "tex_task$1(TEXPTN texptn, intptr_t exinf)\n";
+	}
+	elsif ($tskid =~ /^ALM([0-9]*)$/) {
+		print "\nvoid\n";
 		print "alarm$1_handler(intptr_t exinf)\n";
 	}
+	elsif ($tskid =~ /^CPUEXC([0-9]*)$/) {
+		print "\nvoid\n";
+		print "cpuexc$1_handler(void *p_excinf)\n";
+	}
+	elsif ($tskid =~ /^EXTSVC([0-9]*)$/) {
+		print "\nER_UINT\n";
+		print "extsvc$1_routine(intptr_t par1, intptr_t par2, intptr_t par3,\n";
+		print "\t\t\t\t\t\t\t\tintptr_t par4, intptr_t par5, ID cdmid)\n";
+	}
 	print "{\n";
-	print "\tER\t\tercd;\n";
-	foreach $typename (keys(%{$TASKVAR{$tskid}})) {
-		print "\t",$typename, (length($typename) < 4 ? "\t\t" : "\t"),
-								${$TASKVAR{$tskid}}{$typename},";\n";
-	}
-	if ($TASKCOUNT{$tskid}) {
-		printf "\n\tswitch (++%s) {\n", $TASKCOUNTVAR{$tskid};
-	}
-	print $TASKCODE{$tskid};
-	if ($TASKCOUNT{$tskid}) {
-		printf "\n\t\tcheck_point(0);\n";
+	output_task_vardef($tskid);
+	print "\n";
+	if ($TASKCOUNTVAR{$tskid}) {
+		printf "\tswitch (++%s) {\n", $TASKCOUNTVAR{$tskid};
+		output_task_body($tskid);
+		printf "\tdefault:\n";
+		printf "\t\tcheck_point(0);\n";
 		printf "\t}\n";
 	}
 	else {
-		print "\n";
+		foreach my $line (@{$TASKCODE{$tskid}{""}}) {
+			print $line,"\n";
+		}
 	}
 	print "\tcheck_point(0);\n";
+	if ($tskid =~ /^EXTSVC([0-9]*)$/) {
+		print "\treturn(E_SYS);\n";
+	}
 	print "}\n";
 }
 
 #
 #  テストプログラム出力処理
 #
-foreach $tskid (sort(keys(TASKCODE))) {
-	do output_task();
+foreach $tskid (sort(keys(%TASKCODE))) {
+	output_task();
 }

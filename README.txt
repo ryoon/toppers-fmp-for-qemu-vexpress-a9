@@ -1,5 +1,5 @@
 
-	TOPPERS/FMP Kernel（Release 1.2.0）
+	TOPPERS/FMP Kernel（Release 1.2.3）
 		Toyohashi Open Platform for Embedded Real-Time Systems/
 		Flexible MultiProcessor Kernel
 
@@ -22,7 +22,7 @@ FMPカーネルのドキュメント（プレーンテキストファイル）およびソースファイ
 
 本バージョンに対応したコンフィギュレータのバージョンは．次の通りです．
 
-   1.7.0
+   1.9.0
 
 【質問・バグレポート・意見等の送付先】
 

@@ -155,7 +155,6 @@ pdqcb_table
 p_pdqcb_table
 pdqinib_table
 tmax_mbxid
-mbxcb_table
 p_mbxcb_table
 mbxinib_table
 tmax_mpfid

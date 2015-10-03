@@ -54,7 +54,7 @@ SECTIONS
     CREATE_OBJECT_SYMBOLS
     __cs3_region_start_ram = .;
     ASSERT (. == __cs3_region_start_ram, ".cs3.region-head.ram not permitted");
-    *(.vector)
+    *(vector)
     __cs3_reset = .;
     *(.text .text.* .gnu.linkonce.t.*)
     *(.plt)

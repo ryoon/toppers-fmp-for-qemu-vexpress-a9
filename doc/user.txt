@@ -2,10 +2,10 @@
 		TOPPERS/FMPカーネル
 		ユーザーズマニュアル
 
-		対応バージョン: Release 1.2.0
+		対応バージョン: Release 1.2.3
 		対応ASPカーネルバージョン : Release 1.7.0
 
-		最終更新: 2011年07月07日
+		最終更新: 2014年12月24日
 
 このドキュメントは，TOPPERS/FMPカーネルを使用するために必要な事項を説
 明するものである．
@@ -20,7 +20,7 @@ TOPPERS/FMPカーネルは，シングルプロセッサ向けのRTOSであるTOPPERS/ASPカ
      Toyohashi Open Platform for Embedded Real-Time Systems/
      Flexible MultiProcessor Kernel
 
- Copyright (C) 2005-2011 by Embedded and Real-Time Systems Laboratory
+ Copyright (C) 2005-2014 by Embedded and Real-Time Systems Laboratory
              Graduate School of Information Science, Nagoya Univ., JAPAN
  
  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -52,7 +52,7 @@ TOPPERS/FMPカーネルは，シングルプロセッサ向けのRTOSであるTOPPERS/ASPカ
  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  の責任を負わない．
  
- @(#) $Id: user.txt 849 2011-07-15 08:19:43Z ertl-honda $
+ @(#) $Id: user.txt 1070 2014-12-24 14:17:38Z ertl-honda $
 ----------------------------------------------------------------------
 
 ○目次
@@ -631,7 +631,7 @@ ASPカーネルから変更なし．
 
 ASPカーネルから変更なし．
 
-11.6x トレースログ記録のサンプルコードの使用方法
+11.6 トレースログ記録のサンプルコードの使用方法
 
 トレースログ記録の使用方法の一例として，システム起動時にトレースログの
 記録を開始し，システム終了時に記録したトレースログをダンプするためには，
@@ -809,6 +809,9 @@ ASPカーネルに対して以下の静的APIが追加されている．
 	CRE_SPN( ID spnid { ATR spnatr })
 
 13.3 バージョン履歴
+	2012年12月24日	Release	1.2.3
+	2012年10月30日	Release	1.2.2
+	2012年03月30日	Release	1.2.1
 	2011年07月15日	Release	1.2.0
 	2010年02月08日	Release	1.1.0
 	2009年09月07日	Release	1.0.2

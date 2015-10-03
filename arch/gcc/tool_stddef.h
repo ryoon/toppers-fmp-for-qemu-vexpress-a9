@@ -36,7 +36,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: tool_stddef.h 2 2008-05-09 18:12:27Z ertl-honda $
+ *  @(#) $Id: tool_stddef.h 905 2012-02-27 09:01:23Z ertl-honda $
  */
 
 /*
@@ -198,4 +198,14 @@ typedef double		double64_t;			/* IEEE754準拠の倍精度浮動小数点数 */
 #define DOUBLE64_MAX	1.7976931348623157e+308
 
 #endif /* TOPPERS_STDFLOAT_TYPE1 */
+
+/* 
+ *  テスト用ラベル追加マクロ
+ */
+#if 0
+#define TEST_G_LABEL(string) \
+  Asm(".global "string"\n" \
+      string":\n")
+#endif
+
 #endif /* TOPPERS_TOOL_STDDEF_H */

@@ -139,7 +139,7 @@ CFG2_OUT := kernel_cfg.c kernel_cfg.h $(CFG2_OUT)
 #
 #  共通コンパイルオプションの定義
 #
-COPTS := $(COPTS) -Wall -g
+COPTS := $(COPTS) -g
 ifndef OMIT_WARNING_ALL
   COPTS := $(COPTS) -Wall
 endif
@@ -316,7 +316,7 @@ kernel_cfg.timestamp $(CFG2_OUT): $(APPL_CFG)
 	$(OBJCOPY) -O srec -S $(CFG1_OUT) cfg1_out.srec
 	$(CFG) --pass 2 --kernel fmp $(INCLUDES) \
 				-T $(TARGETDIR)/target.tf $(CFG_TABS) $<
-	touch kernel_cfg.timestamp
+	touch -r kernel_cfg.c kernel_cfg.timestamp
 
 #
 #  カーネルライブラリファイルの生成
