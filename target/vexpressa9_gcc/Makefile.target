@@ -101,7 +101,7 @@ $(HIDDEN_OBJS:.o=.d): %.d: %.S
 	@$(PERL) $(SRCDIR)/utils/makedep -C $(CC) \
 		-O "$(CFLAGS) $(KERNEL_CFLAGS)" $< >> Makefile.depend
 
-LDFLAGS := -nostdlib $(LDFLAGS)
+COPTS := -nostdlib $(COPTS)
 
 #  Dependency timestamp
 kernel_cfg.timestamp: $(TARGETDIR)/target.tf
