@@ -1,0 +1,36 @@
+# start.S
+start_sync
+
+# core_support.S
+start_r
+ret_int
+ret_exc
+vector_table
+vector_ref_tbl
+undef_handler
+swi_handler
+prefetch_handler
+data_abort_handler
+interrupt_handler
+fiq_handler
+dispatch
+start_dispatch
+exit_and_dispatch
+call_exit_kernel
+default_exc_handler
+dispatch_and_migrate
+exit_and_migrate
+ret_int_ipi_dispatch
+
+# core_config.c
+arm_vector_ref_tbl_add
+arm_saved_exch_add
+core_initialize
+core_terminate
+xlog_sys
+x_install_exc
+
+
+# kernel_cfg.c
+p_accb_table
+p_exch_table

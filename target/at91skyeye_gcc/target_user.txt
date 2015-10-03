@@ -1,0 +1,417 @@
+=====================================================================
+                        AT91SKYEYEターゲット依存部
+                                  Last Modified: 2011 May 02 22:20:50
+=====================================================================
+
+○概要
+
+AT91SKYEYEターゲット依存部は，オープンソースのプロセッサシミュレータで
+あるSkyEyeの ARM7TDMI をベースとした AT91 システムをサポートしている．
+サポートしているプロセッサ数は，2〜4個であり，ディフォルトでは2個で動
+作する．なお，SkyEyeはTOPPERSプロジェクトでマルチプロセッサ向きに拡張
+されたものを使用する必要がある．
+
+○サポートしているコンフィギュレーション項目
+
+AT91SKYEYEターゲット依存部では，次のコンフィギュレーション項目をサポー
+トしている．
+
+・OS内部のロック単位
+  ・ジャイアントロック方式
+  ・プロセッサロック方式
+
+・スピンロックアーキテクチャ
+  ・ネイティブ方式（4個まで）
+  ・エミュレーション方式
+
+・タイマアーキテクチャ
+  ・グローバルタイマ方式
+  ・ローカルタイマ方式
+
+○SkyEye
+
+SkyEyeは，TOPPERSプロジェクトからTOPPERSカーネル向けシミュレーション環
+境として公開されているものを用いる．TOPPERSカーネル向けシミュレーショ
+ン環境は，以下のページからダウンロード可能である．
+
+  http://www.toppers.jp/sim.html
+  
+動作確認を行ったバージョンはである．
+
+ DeviceManager Extension 2.2.0 
+ 
+○実行
+
+カーネルのビルド後，実行したいプロセッサ個数分のターミナルを開く．次に
+各ターミナルで次のコマンドを実行する．なお，PE1の実行は，他のプロセッ
+サを実行後に行うこと．$FMP$は，FMPを展開したパスである．
+
+PE1
+   $skyeye.exe -e fmp.exe -c $FMP$/target/at91skyeye_gcc/skyeye_pe1.conf 
+
+PE2
+   $skyeye.exe -e fmp.exe -c $FMP$/target/at91skyeye_gcc/skyeye_pe2.conf 
+
+PE3
+   $skyeye.exe -e fmp.exe -c $FMP$/target/at91skyeye_gcc/skyeye_pe3.conf 
+
+PE4
+   $skyeye.exe -e fmp.exe -c $FMP$/target/at91skyeye_gcc/skyeye_pe4.conf 
+
+○カーネルの使用リソース
+
+カーネルはプロセッサ毎に以下のリソースを使用する．
+
+  ・RAM
+     コードとデータを配置する．
+     使用量はオブジェクト数に依存する．
+  
+  ・TC1
+     カーネル内部のティックの生成に用いる．
+     
+  ・USART0
+     コンソールの出力に使用．
+
+  ・Mutex
+    ・ID  0 : プロセッサ1のタスクロック 
+    ・ID  1 : プロセッサ1のオブジェクトロック 
+    ・ID  2 : プロセッサ2のタスクロック 
+    ・ID  3 : プロセッサ2のオブジェクトロック 
+    ・ID  4 : プロセッサ3のタスクロック 
+    ・ID  5 : プロセッサ3のオブジェクトロック 
+    ・ID  6 : プロセッサ4のタスクロック 
+    ・ID  7 : プロセッサ4のオブジェクトロック 
+    ・ID  6 : プロセッサ4のタスクロック 
+    ・ID  7 : プロセッサ4のオブジェクトロック 
+    ・ID 10 : システムインタフェースレイヤーのスピンロック
+    ・ID 20 : ネイティブ方式のスピンロック
+    ・ID 21 :  ネイティブ方式のスピンロック
+    ・ID 22 : ネイティブ方式のスピンロック
+    ・ID 23 :  ネイティブ方式のスピンロック
+
+  ・プロセッサ間割込み
+    ・プロセッサ毎に1個使用．
+
+○実行環境
+
+動作確認を行った実行環境は，Widnows 7 上の Cygwin である．
+
+○デバッグ環境
+
+デバッグ環境としては，skyeyeのサポートする方法を用いることができる．
+arm-elf-gdb によるデバッグの動作確認を行った．
+
+○コンパイラ
+
+動作確認した GCC は，以下のサイトからWindows版のバイナリをダウンロードして使用し
+た以下のバージョンである．
+
+  http://www.codesourcery.com/
+   4.4.1 (Sourcery G++ Lite 2010q1-188)
+   4.5.1 (Sourcery G++ Lite 2010.09-51)  
+
+上記コンパイラをインストールする際には，空白が含まれるディレクトリにイ
+ンストールしないこと（インストーラが作成するインストールディレクトリ自
+体に空白が含まれるため注意すること）．
+
+○カーネル終了時の処理
+
+ext_ker が呼び出されカーネル終了時には，at91skyeye.h にある 
+at91skyeye_exit() が実行される．ディフォルトでは，特に処理は記述されて
+いない．独自の処理処理を追加したい場合は，at91skyeye_exit() の内容を書
+き換えること．
+
+○ gcovによるカバレッジ取得
+
+gcovによるカバレッジを取得したい場合には，Makefileで ENABLE_GCOV を以
+下の値のいずれかに定義すること．
+
+    full              : 全体取得
+    part              : 一部取得
+    only_kernel_full  : 全体取得(カーネルコードのみ)
+    only_kernel_part  : 一部取得(カーネルコードのみ)
+
+full と only_kernel_full は，プログラム実行全体のカバレッジを取得する． 
+only_kernel_full はカーネルコードのみのカバレッジを取得する．これらの
+カバレッジ結果は，ext_ker()を呼び出してカーネル終了することにより，
+*.gcda に出力される．
+
+part と only_kernel_part 指定した区間（時間）のカバレッジを取得する． 
+only_kernel_part はカーネルコードのみのカバレッジを取得する．区間（時
+間）を指定やカバレッジの出力のために以下の関数を提供する．
+
+void gcov_init(void);
+ GCOV初期化関数．呼び出した時点以降のカバレッジを取得する．
+
+void gcov_pause(void);
+ GCOV中断関数．カバレッジの取得を中断する．
+ 
+void gcov_resume(void);
+GCOV再開関数．カバレッジの取得を再開する．
+
+void gcov_dump(void);
+ GCOV出力関数．カバレッジを.gcda に出力する．
+
+カーネル実行後にカーネルがあるディレクトリで以下のコマンドを実行すると，
+カバレッジの結果が xxx.c.gcov に出力される．
+
+ $arm-none-eabi-gcov.exe *.gcda
+
+動作確認を行ったバージョンは 1.9 であるが，日本語を出力するためと，
+Windwosネイティブアプリである Sourcery G++ を Cygwin環境上で使用してい
+る場合には，以下のパッチが必要である．
+
+--------------------------------------------------------------------------
+--- lcov-1.9_org/bin/genhtml	2010-08-06 20:05:17.000000000 +0900
++++ lcov-1.9/bin/genhtml	2010-11-24 11:29:58.075739700 +0900
+@@ -4007,10 +4007,10 @@
+ 	write_html($_[0], <<END_OF_HTML)
+ 	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
+ 
+-	<html lang="en">
++	<html lang="ja">
+ 
+ 	<head>
+-	  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
++	  <meta http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+ 	  <title>$_[3]</title>
+ 	  <link rel="stylesheet" type="text/css" href="$_[1]gcov.css">
+ 	</head>
+@@ -4069,11 +4069,11 @@
+ 	write_html($_[0], <<END_OF_HTML)
+ 	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+ 
+-	<html lang="en">
++	<html lang="ja">
+ 
+ 	<head>
+ 	  <title>$_[3]</title>
+-	  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
++	  <meta http-equiv="Content-Type" content="text/html; charset=ECU-JP">
+ 	  <link rel="stylesheet" type="text/css" href="$_[1]gcov.css">
+ 	</head>
+ 
+@@ -5578,10 +5578,10 @@
+ 		$result = <<END_OF_HTML
+ <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+ 
+-<html lang="en">
++<html lang="ja">
+ 
+ <head>
+-  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
++  <meta http-equiv="Content-Type" content="text/html; charset=ECU-JP">
+   <title>\@pagetitle\@</title>
+   <link rel="stylesheet" type="text/css" href="\@basedir\@gcov.css">
+ </head>
+diff -urN lcov-1.9_org/bin/geninfo lcov-1.9/bin/geninfo
+--- lcov-1.9_org/bin/geninfo	2010-08-06 20:05:17.000000000 +0900
++++ lcov-1.9/bin/geninfo	2010-11-24 11:31:26.481094900 +0900
+@@ -862,7 +862,7 @@
+ 
+ 	# Execute gcov command and suppress standard output
+ 	$gcov_error = system_no_output(1, $gcov_tool, $da_filename,
+-				       "-o", $object_dir, @gcov_options);
++				       @gcov_options);
+ 
+ 	if ($da_renamed)
+ 	{
+@@ -929,7 +929,7 @@
+ 		my $num;
+ 
+ 		($source, $object) = read_gcov_header($gcov_file);
+-
++		$source =~ s/(.*)\r$/$1/;
+ 		if (defined($source))
+ 		{
+ 			$source = solve_relative_path($base_dir, $source);
+--------------------------------------------------------------------------
+
+カバレッジの取得後，以下のコマンドを実行すると，coverage_html 以下にカ
+バレッジ結果のhtmlが生成される．
+
+   $make lcov
+
+○トレースログのファイル出力
+
+トレースログをファイルへ出力するための文字出力関数を用意している．
+
+ void target_fput_log_file(char_t c);
+ 
+この関数を trace_dump の引数とすることにより，トレースログは，
+kernel_trace.log というファイルに出力される．
+
+○各種設定の変更
+
+幾つかのパラメータは変更可能になっている．設定ファイル毎に設定可能項目
+は次のようになっている．
+
+●Makefile.target の設定項目
+
+・GCC_TARGET
+  GCCの suffix を定義
+
+・INCLUDES
+  インクルード指定
+
+・COPTS
+  Cコンパイラへのオプション
+
+・LDFLAGS
+  リンカへのオプション
+
+●target_config.h の設定項目
+
+・DEFAULT_ISTKSZ
+  ディフォルトの非タスクコンテキスト用のスタックサイズ
+
+・SIL_DLY_TIM1/2
+  微少時間待ちのための定義
+
+・TTYPE_KLOCK
+  カーネルロックの方式を設定
+
+・TTYPE_SPN 
+  スピンロック機能の方式を設定
+
+●target_kernel.h の設定項目
+
+・TNUM_PRCID 
+  プロセッサ数
+
+・TOPPERS_SYSTIM_LOCAL
+  ローカルタイマ方式を有効に
+
+・TOPPERS_SYSTIM_GLOBAL
+  グローバルタイマ方式を有効に
+
+
+○変更履歴
+2011/05/02
+・ASP 1.7.0 への追従．
+・offset.h をコンフィギュレータで生成するように変更．
+ ・この変更に伴い，構造体のエントリ名が_tableで終わる場合，offset_ofを
+   使用するとコンパイラがエラーとなるため，エントリ名を_tblに変更
+ 
+
+2011/03/10
+・ASP 1.7.0 への追従．
+
+2011/03/08
+・CPU例外を発生させる未定義命令がGCOVを取得する場合で異なってしまうた
+  め，条件コンパイルで切り替えるように変更．
+
+2011/03/04
+・トレースログをファイルに出力する機能を追加．
+
+2011/01/31
+・SkyEyeのバージョンがサポートしているバージョンと異なった場合に，
+  SkyEyeのバージョンと，カーネルがサポートしているバージョンを表示する
+  ように変更．
+  
+2010/11/30
+・全ての割込みをマスクしてARM依存の終了処理を呼び出すように変更．
+
+2010/11/24
+・lcov 1.9 への対応．
+・カーネルコンフィギュレーションをmakeのオプションで変更できるように変
+  更．
+
+2010/11/07
+・RAISE_CPU_EXCEPTIONは，GCOVの取得の有無で設定値が変わらないため，
+  ifdefを排除．
+
+2010/11/01
+・4種類のカバレッジ取得方法をサポート．
+
+2010/10/14
+・tfファイル内で定義されている TCL_ADMIN_PRC の定義を 
+  target_kernel.h で定義されている，TOPPERS_SYSTIM_PRCID の定義と連動
+  するように変更．
+・TOPPERS_SYSTIM_PRCID の定義で使用する割込みハンドラを変更するように
+  変更．
+・クラス(TCL_x_ONLY)を追加．
+
+2010/09/22
+・TTSP用のクラス(TCL_2_ONLY)を追加．
+
+2010/09/17
+・初期値無し変数に".bss"がついていないセクション名を指定すると，data属
+  性となり，これを.bssセクションに配置すると，リンカがワーニングを出す
+  問題を修正．
+
+2010/09/10
+・GCOVを有効時にマクロ TOPPERS_ENABLE_GCOV を有効にするよう変更．
+・CPU例外を未定義命令に変更．
+
+2010/06/23
+・ena_int()で，割込みマスクの状態を考慮せずにハードウェアを更新してい
+  た問題を修正．
+
+2010/06/02
+・テストプログラム関連のコードを削除．
+
+2010/05/20
+・割込み発生関数の修正．
+・target_test.hの割込み番号と割込みハンドラ番号を修正．
+
+2010/05/19
+・割込み受け付け時に，システムの割込み優先度マスクを受け付けた割込みの
+  割込み優先度に設定していなかった問題を修正．
+
+2010/04/21
+・SkyEye DeviceManager Extension 2.1.0 に対応．
+・起動時にSkyEyeのバージョンを確認するように変更．
+
+2010/03/29
+・skyeye_pe3/_pe4のメモリマップの設定の修正．
+
+2010/02/26
+・target_timer.c をTTG用に変更．
+・target_test.o をディフォルトでリンクするように変更．
+
+2010/02/16
+・グローバルタイマ方式時にタイマ割込みをTCL_ADMIN_PRC（クラスID 5）に
+  属するように変更．
+
+2010/01/27
+・ロック変数の型(LOCK)の定義をtypedefに変更．
+・スピンロックの型(SPNLOCK)の定義をtypedefに変更．
+
+2009/12/16
+・システム終了時に，マスタプロセッサ以外は，_exit()を呼び出してSkyEye
+  を終了させるように変更．
+
+2009/11/30
+・リンカスクリプトを generic-hosted.ld ベースから，
+  armulator-ram-hosted.ld ベースに変更．
+  コード・データサイズを大きくすると，標準関数やgcovが正しく動作しない
+  問題を解決．同時に skyeye.conf のメモリの設定をリンカスクリプトの内
+  容と統一．
+
+2009/11/03
+・SIL_LOC_SPNの仕様を変更．
+  ロック取得を待つ間は，割込みをマスクしないように変更．
+
+2009/10/16
+・アセンブラファイル中の分岐命令を AAPCS推奨に変更．
+  mov pc, xx -> bx pc
+
+2009/08/02
+・newlibのサポート．サポートに伴い，SkyEyeはTOPPERSプロジェクトから公
+  開している SkyEye -V1.2 DeviceManager Extension 2.0.3 以降 が必要と
+  なる．
+・gcovのサポート．
+・lcovのサポート．
+
+2009/07/09
+・target_timer_initialize()でタイマ周期にTIMER_CLOCKの値を反映するよう
+  に修正．
+
+2009/07/08
+ 性能評価用のマクロをサイクルカウンタの値を取得するように定義．
+
+2009/06/25
+ 新規作成．
+
+以上．
