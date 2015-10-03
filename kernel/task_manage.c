@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2005-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2005-2012 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: task_manage.c 794 2011-03-14 03:25:53Z ertl-honda $
+ *  @(#) $Id: task_manage.c 905 2012-02-27 09:01:23Z ertl-honda $
  */
 
 /*
@@ -648,7 +648,7 @@ ext_tsk(void)
 		}
 		release_tsk_lock(my_p_pcb);
 		exit_and_dispatch();
-		assert(0);
+		ercd = E_SYS;
 	}
 	else {
 		/* 移動先のプロセッサのPCBを取得 */
@@ -689,7 +689,7 @@ ext_tsk(void)
 
 		/* 現在コンテキストを捨ててマイグレーション */
 		exit_and_migrate(p_runtsk->actprc);
-		assert(0);
+		ercd = E_SYS;
 	}
 
   error_exit:
@@ -909,6 +909,7 @@ ter_tsk(ID tskid)
 				 *   オブジェクトロック -> タスクロック
 				 * の順でロックを取得 
 				 */
+				TEST_G_LABEL("_test_ter_tsk_01");
 				t_acquire_obj_lock(&GET_OBJLOCK(p_wobjcb));
 				if ((p_pcb = t_acquire_nested_tsk_lock(p_tcb, &GET_OBJLOCK(p_wobjcb))) == NULL){
 					goto retry;
@@ -954,6 +955,7 @@ ter_tsk(ID tskid)
 				 *   オブジェクトロック -> タスクロック
 				 * の順でロックを取得 
 				 */
+				TEST_G_LABEL("_test_ter_tsk_02"); 
 				t_acquire_obj_lock(&GET_OBJLOCK(p_wobjcb));
 				if (t_acquire_nested_dual_tsk_lock(p_tcb, p_tcb->actprc, &GET_OBJLOCK(p_wobjcb),
 												   &p_pcb, &t_p_pcb)) {
@@ -1057,6 +1059,7 @@ chg_pri(ID tskid, PRI tskpri)
 			 *   オブジェクトロック -> タスクロック
 			 * の順でロックを取得 
 			 */
+			TEST_G_LABEL("_test_chg_pri");
 		  retry:
 			t_acquire_obj_lock(&GET_OBJLOCK(p_wobjcb));
 			if ((p_pcb = t_acquire_nested_tsk_lock(p_tcb, &GET_OBJLOCK(p_wobjcb))) == NULL){

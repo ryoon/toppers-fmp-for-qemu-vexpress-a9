@@ -1,5 +1,5 @@
 
-	TOPPERS/FMP Kernel（Release 1.2.0）
+	TOPPERS/FMP Kernel（Release 1.2.2）
 		Toyohashi Open Platform for Embedded Real-Time Systems/
 		Flexible MultiProcessor Kernel
 

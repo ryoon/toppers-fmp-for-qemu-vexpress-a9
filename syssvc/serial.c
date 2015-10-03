@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: serial.c 447 2009-10-16 08:51:47Z ertl-honda $
+ *  @(#) $Id: serial.c 898 2012-02-24 05:15:21Z ertl-honda $
  */
 
 /*
@@ -288,7 +288,9 @@ static SPCB* const	p_spcb_table[TNUM_PORT] = {
 /*
  *  ポインタのインクリメント
  */
-#define INC_PTR(ptr, bufsz)		{ if (++(ptr) == (bufsz)) { (ptr) = 0; }}
+#define INC_PTR(ptr, bufsz)		do {					\
+	if (++(ptr) == (bufsz)) { (ptr) = 0; }				\
+} while(false)
 
 /*
  *  サービスコール呼出しマクロ

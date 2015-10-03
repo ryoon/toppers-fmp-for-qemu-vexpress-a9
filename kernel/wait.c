@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2005-2010 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2005-2012 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: wait.c 806 2011-05-20 02:38:42Z ertl-honda $
+ *  @(#) $Id: wait.c 941 2012-10-19 05:43:22Z ertl-honda $
  */
 
 /*
@@ -118,7 +118,7 @@ wait_tmout(TCB *p_tcb)
 		/*
 		 * デッドロック回避対応
 		 *
-		 * デットロック回避のためにタスクロックロックを解放した間に他
+		 * デットロック回避のためにタスクロックを解放した間に他
 		 * のコアから待ち状態を解除される可能性がある．
 		 * そのため，pend_relwai をtrue としてロックを解除する．
 		 * 他の待ち状態を解除するAPIが発行された場合には，APIの内部で，
@@ -144,6 +144,7 @@ wait_tmout(TCB *p_tcb)
 		 * あらためて
 		 * オブジェクトロック -> タスクロックの順でロックを取得
 		 */
+		TEST_G_LABEL("_test_wait_tmout");
 	  retry:
 		i_acquire_obj_lock(&GET_OBJLOCK(p_wobjcb));
 		if (i_acquire_nested_tsk_lock(p_tcb, &GET_OBJLOCK(p_wobjcb)) == NULL){

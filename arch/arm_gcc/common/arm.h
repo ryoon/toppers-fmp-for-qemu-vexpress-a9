@@ -2,7 +2,7 @@
  *  TOPPERS/FMP Kernel
  *      Toyohashi Open Platform for Embedded Real-Time Systems/
  *      Flexible MultiProcessor Kernel
- * 
+ *
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
  *  Copyright (C) 2006-2008 by Embedded and Real-Time Systems Laboratory
@@ -30,14 +30,14 @@
  *      また，本ソフトウェアのユーザまたはエンドユーザからのいかなる理
  *      由に基づく請求からも，上記著作権者およびTOPPERSプロジェクトを
  *      免責すること．
- * 
+ *
  *  本ソフトウェアは，無保証で提供されているものである．上記著作権者お
  *  よびTOPPERSプロジェクトは，本ソフトウェアに関して，特定の使用目的
  *  に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
- * 
- *  @(#) $Id: arm.h 2 2008-05-09 18:12:27Z ertl-honda $
+ *
+ *  @(#) $Id: arm.h 955 2012-10-30 07:31:22Z ertl-honda $
  */
 
 /*

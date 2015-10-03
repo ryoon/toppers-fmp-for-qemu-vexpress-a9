@@ -1,0 +1,38 @@
+Subject: [PATCH] target-arm: fix target CPUs on ARM GIC
+
+Fix a bug on the ARM GIC model where interrupts are not
+set pending on the correct target CPUs when they are
+triggered by writes to the Interrupt Set Enable or
+Set Pending registers.
+
+Signed-off-by: Daniel Sangorrin <dsl@ertl.jp>
+---
+ hw/arm_gic.c |    5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/hw/arm_gic.c b/hw/arm_gic.c
+index f9e423f..97b0677 100644
+--- a/hw/arm_gic.c
++++ b/hw/arm_gic.c
+@@ -374,7 +374,8 @@ static void gic_dist_writeb(void *opaque, hwaddr offset,
+           value = 0xff;
+         for (i = 0; i < 8; i++) {
+             if (value & (1 << i)) {
+-                int mask = (irq < GIC_INTERNAL) ? (1 << cpu) : GIC_TARGET(irq);
++                int mask =
++                    (irq < GIC_INTERNAL) ? (1 << cpu) : GIC_TARGET(irq + i);
+                 int cm = (irq < GIC_INTERNAL) ? (1 << cpu) : ALL_CPU_MASK;
+ 
+                 if (!GIC_TEST_ENABLED(irq + i, cm)) {
+@@ -417,7 +418,7 @@ static void gic_dist_writeb(void *opaque, hwaddr offset,
+ 
+         for (i = 0; i < 8; i++) {
+             if (value & (1 << i)) {
+-                GIC_SET_PENDING(irq + i, GIC_TARGET(irq));
++                GIC_SET_PENDING(irq + i, GIC_TARGET(irq + i));
+             }
+         }
+     } else if (offset < 0x300) {
+-- 
+1.7.9.5
+

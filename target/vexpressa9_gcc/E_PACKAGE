@@ -1,0 +1,9 @@
+E_PACKAGE fmp_vexpressa9_gcc
+VERSION %date
+
+INCLUDE MANIFEST
+INCLUDE ../../MANIFEST
+INCLUDE ../../arch/arm_gcc/mpcore/MANIFEST
+INCLUDE ../../pdic/arm_primecell_uart/MANIFEST
+INCLUDE ../../cfg/MANIFEST
+../../cfg/cfg/cfg

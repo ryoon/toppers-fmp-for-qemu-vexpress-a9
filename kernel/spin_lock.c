@@ -35,7 +35,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: spin_lock.c 801 2011-05-03 13:54:23Z ertl-honda $
+ *  @(#) $Id: spin_lock.c 891 2012-02-08 12:34:04Z ertl-honda $
  */
 
 /*
@@ -409,7 +409,7 @@ ref_spn(ID spnid, T_RSPN *pk_rspn)
 	SPNCB   *p_spncb;
 
 	LOG_REF_SPN_ENTER(spnid, pk_rspn);
-	CHECK_TSKCTX_UNL()
+	CHECK_TSKCTX_UNL();
 	CHECK_SPNID(spnid);
 	p_spncb = get_spncb(spnid);
 
@@ -741,7 +741,7 @@ ref_spn(ID spnid, T_RSPN *pk_rspn)
 	SPNCB   *p_spncb;
 
 	LOG_REF_SPN_ENTER(spnid, pk_rspn);
-	CHECK_TSKCTX_UNL()
+	CHECK_TSKCTX_UNL();
 	CHECK_SPNID(spnid);
 	p_spncb = get_spncb(spnid);
 

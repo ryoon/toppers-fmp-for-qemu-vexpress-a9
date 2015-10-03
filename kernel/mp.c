@@ -3,7 +3,7 @@
  *      Toyohashi Open Platform for Embedded Real-Time Systems/
  *      Flexible MultiProcessor Kernel
  * 
- *  Copyright (C) 2008-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2008-2012 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -35,7 +35,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: mp.c 792 2011-03-10 14:18:33Z ertl-honda $
+ *  @(#) $Id: mp.c 905 2012-02-27 09:01:23Z ertl-honda $
  */
 
 /*
@@ -292,6 +292,7 @@ t_acquire_tsk_lock_self(void)
 	while(true) {
 		my_p_pcb = get_my_p_pcb();
 		my_p_tcb = my_p_pcb->p_runtsk;
+		TEST_G_LABEL("_test_t_acquire_tsk_lock_self"); 
 		t_acquire_lock(&(my_p_pcb->tsk_lock));
 		if (!TSTAT_RUNNABLE(my_p_tcb->tstat)) { 
 			/* RUNNABLEでない場合 */
@@ -361,6 +362,7 @@ t_acquire_nested_tsk_lock_self(LOCK *p_objlock)
 
 	my_p_pcb = get_my_p_pcb();
 	my_p_pcb->p_firstlock = p_objlock;
+	TEST_G_LABEL("_test_t_acquire_nested_tsk_lock_self"); 
 	if (t_acquire_nested_lock(&(my_p_pcb->tsk_lock))) {
 		return(NULL);
 	}
@@ -386,6 +388,7 @@ t_acquire_tsk_lock(TCB *p_tcb)
 
 	while(true) {
 		p_pcb = p_tcb->p_pcb;
+		TEST_G_LABEL("_test_t_acquire_tsk_lock"); 
 		t_acquire_lock(&(p_pcb->tsk_lock));
 		if (p_pcb != p_tcb->p_pcb) {
 			/* 対象タスクがマイグレートした場合 */
@@ -417,6 +420,7 @@ t_acquire_nested_tsk_lock(TCB *p_tcb, LOCK *p_objlock)
 		my_p_pcb = get_my_p_pcb();
 		my_p_pcb->p_firstlock = p_objlock;
 		p_pcb = p_tcb->p_pcb;
+		TEST_G_LABEL("_test_t_acquire_nested_tsk_lock"); 
 		if (t_acquire_nested_lock(&(p_pcb->tsk_lock))) {
 			p_pcb = NULL;
 			break;
@@ -442,6 +446,7 @@ t_acquire_tsk_lock_alm(ALMCB *p_almcb)
 
 	while(true){
 		p_pcb = p_almcb->p_pcb;
+		TEST_G_LABEL("_test_t_acquire_tsk_lock_alm"); 
 		t_acquire_lock(&(p_pcb->tsk_lock));
 		if (p_pcb != p_almcb->p_pcb) {
 			x_release_lock(&(p_pcb->tsk_lock));
@@ -462,6 +467,7 @@ t_acquire_tsk_lock_cyc(CYCCB *p_cyccb)
 
 	while(true){
 		p_pcb = p_cyccb->p_pcb;
+		TEST_G_LABEL("_test_t_acquire_tsk_lock_cyc");
 		t_acquire_lock(&(p_pcb->tsk_lock));
 		if (p_pcb != p_cyccb->p_pcb) {
 			x_release_lock(&(p_pcb->tsk_lock));
@@ -493,6 +499,7 @@ t_acquire_dual_tsk_lock(TCB *p_tcb, ID dstprcid,
 
 	while(true) {
 		*pp_srcpcb = p_tcb->p_pcb;
+		TEST_G_LABEL("_test_t_acquire_dual_tsk_lock");
 		if ((*pp_srcpcb)->prcid > dstprcid) {
 			/* 1段目のロックを取得 */
 			t_acquire_lock(&((*pp_dstpcb)->tsk_lock));
@@ -550,6 +557,7 @@ t_acquire_dual_tsk_lock_alm(ALMCB *p_almcb, ID dstprcid,
 
 	while(true) {
 		*pp_srcpcb = p_almcb->p_pcb;
+		TEST_G_LABEL("_test_t_acquire_dual_tsk_lock_alm");
 		if ((*pp_srcpcb)->prcid > dstprcid) {
 			/* 1段目のロックを取得 */
 			t_acquire_lock(&((*pp_dstpcb)->tsk_lock));
@@ -607,6 +615,7 @@ t_acquire_dual_tsk_lock_cyc(CYCCB *p_cyccb, ID dstprcid,
 
 	while(true) {
 		*pp_srcpcb = p_cyccb->p_pcb;
+		TEST_G_LABEL("_test_t_acquire_dual_tsk_lock_cyc");
 		if ((*pp_srcpcb)->prcid > dstprcid) {
 			/* 1段目のロックを取得 */
 			t_acquire_lock(&((*pp_dstpcb)->tsk_lock));
@@ -683,6 +692,7 @@ t_acquire_nested_dual_tsk_lock(TCB *p_tcb, ID dstprcid, LOCK *p_objlock,
 		*pp_srcpcb = p_tcb->p_pcb;
 		my_p_pcb = get_my_p_pcb();
 		my_p_pcb->p_firstlock = p_objlock;
+		TEST_G_LABEL("_test_t_acquire_nested_dual_tsk_lock");
 		if ((*pp_srcpcb)->prcid > dstprcid) {
 			/* 2段目のロックを取得 */
 			if (t_acquire_nested_lock(&((*pp_dstpcb)->tsk_lock))) {
@@ -786,6 +796,7 @@ i_acquire_tsk_lock(TCB *p_tcb)
 
 	while(true) {
 		p_pcb = p_tcb->p_pcb;
+		TEST_G_LABEL("_test_i_acquire_tsk_lock");
 		i_acquire_lock(&(p_pcb->tsk_lock));
 		if (p_pcb != p_tcb->p_pcb) {
 			/* 対象タスクがマイグレートした場合 */
@@ -810,6 +821,7 @@ i_acquire_nested_tsk_lock(TCB *p_tcb, LOCK *p_objlock)
 		my_p_pcb = get_my_p_pcb();
 		my_p_pcb->p_firstlock = p_objlock;
 		p_pcb = p_tcb->p_pcb;
+		TEST_G_LABEL("_test_i_acquire_nested_tsk_lock");
 		if (i_acquire_nested_lock(&(p_pcb->tsk_lock))) {
 			p_pcb = NULL;
 			break;
@@ -835,6 +847,7 @@ i_acquire_tsk_lock_alm(ALMCB *p_almcb)
 
 	while(true){
 		p_pcb = p_almcb->p_pcb;
+		TEST_G_LABEL("_test_i_acquire_tsk_lock_alm");
 		i_acquire_lock(&(p_pcb->tsk_lock));
 		if (p_pcb != p_almcb->p_pcb) {
 			x_release_lock(&(p_pcb->tsk_lock));
@@ -858,6 +871,7 @@ i_acquire_dual_tsk_lock(TCB *p_tcb, ID dstprcid,
 
 	while(true) {
 		*pp_srcpcb = p_tcb->p_pcb;
+		TEST_G_LABEL("_test_i_acquire_dual_tsk_lock");
 		if ((*pp_srcpcb)->prcid > dstprcid) {
 			/* 1段目のロックを取得 */
 			i_acquire_lock(&((*pp_dstpcb)->tsk_lock));
@@ -915,6 +929,7 @@ i_acquire_dual_tsk_lock_alm(ALMCB *p_almcb, ID dstprcid,
 
 	while(true) {
 		*pp_srcpcb = p_almcb->p_pcb;
+		TEST_G_LABEL("_test_i_acquire_dual_tsk_lock_alm");
 		if ((*pp_srcpcb)->prcid > dstprcid) {
 			/* 1段目のロックを取得 */
 			i_acquire_lock(&((*pp_dstpcb)->tsk_lock));
@@ -1058,6 +1073,7 @@ acquire_nested_tsk_lock_without_preemption(TCB *p_tcb)
 
 	while(true) {
 		p_pcb = p_tcb->p_pcb;
+		TEST_G_LABEL("_test_acquire_nested_tsk_lock_without_preemption");
 		x_acquire_lock_without_preemption(&(p_pcb->tsk_lock));
 		if (p_pcb != p_tcb->p_pcb) {
 			/* 対象タスクがマイグレートした場合 */

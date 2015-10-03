@@ -36,7 +36,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: t_stddef.h 792 2011-03-10 14:18:33Z ertl-honda $
+ *  @(#) $Id: t_stddef.h 905 2012-02-27 09:01:23Z ertl-honda $
  */
 
 /*
@@ -280,5 +280,12 @@ typedef	struct acvct {				/* アクセス許可ベクタ */
 #else /* UINT_MAX < LONG_MAX */
 #define TMAX_RELTIM		((RELTIM) LONG_MAX)
 #endif /* UINT_MAX < LONG_MAX */
+
+/* 
+ *  テスト用ラベル追加マクロのディフォルト定義
+ */
+#ifndef TEST_G_LABEL
+#define TEST_G_LABEL(string)
+#endif /* TEST_G_LABEL */
 
 #endif /* TOPPERS_T_STDDEF_H */

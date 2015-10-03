@@ -5,7 +5,7 @@
  * 
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2005-2009 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2005-2012 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
@@ -37,7 +37,7 @@
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
  * 
- *  @(#) $Id: mp.h 752 2010-11-30 06:27:41Z ertl-honda $
+ *  @(#) $Id: mp.h 905 2012-02-27 09:01:23Z ertl-honda $
  */
 
 /*
@@ -678,7 +678,6 @@ extern PCB* acquire_nested_tsk_lock_without_preemption(TCB *p_tcb);
  */
 extern void acquire_dual_tsk_lock_without_preemption(TCB *p_tcb, ID dstprcid, 
 										 PCB **pp_srcpcb, PCB **pp_dstpcb);
-	 
 #endif /* TTYPE_KLOCK != G_KLOCK */
 
 #endif /* TOPPERS_MP_H */

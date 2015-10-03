@@ -1,0 +1,128 @@
+From 45cd46f5a543a10b6d2239f8b8b3e26a33e2577b Mon Sep 17 00:00:00 2001
+From: Daniel Sangorrin <dsl@ertl.jp>
+Date: Fri, 14 Dec 2012 14:11:37 +0900
+Subject: [PATCH] UBOOT multicore and safeg support
+
+---
+ arch/arm/cpu/armv7/start.S        |   17 ++++++++++++++++
+ include/configs/vexpress_common.h |   39 +++++++++++++------------------------
+ 2 files changed, 31 insertions(+), 25 deletions(-)
+
+diff --git a/arch/arm/cpu/armv7/start.S b/arch/arm/cpu/armv7/start.S
+index 7be5548..a379d02 100644
+--- a/arch/arm/cpu/armv7/start.S
++++ b/arch/arm/cpu/armv7/start.S
+@@ -374,6 +374,23 @@ ENDPROC(cpu_init_cp15)
+  *
+  *************************************************************************/
+ ENTRY(cpu_init_crit)
++        mrc     p15,0,r0,c0,c0,5                @ Check of CPU ID #
++        ands    r0, r0, #0xf
++        beq     do_lowlevel_init                @ CPI ID #0
++
++#define UBOOT_LOAD_ADDRESS               0x60000000 /* reset vector address */
++#define UBOOT_HOLDING_PEN_POINTER        0x80A00000 /* pointer to magic holding pen release value */
++#define UBOOT_HOLDING_PEN_RELEASE_VALUE  0x87654321 /* magic holding pen release value */
++
++slave_wait:
++        ldr  r0, =UBOOT_HOLDING_PEN_POINTER
++        ldr  r1, =UBOOT_HOLDING_PEN_RELEASE_VALUE
++        ldr  r2, [r0]
++        cmp  r1, r2
++        bne  slave_wait
++        ldr  pc, =UBOOT_LOAD_ADDRESS
++
++do_lowlevel_init:
+ 	/*
+ 	 * Jump to board specific initialization...
+ 	 * The Mask ROM will have already initialized
+diff --git a/include/configs/vexpress_common.h b/include/configs/vexpress_common.h
+index 88a2c95..af9cf9d 100644
+--- a/include/configs/vexpress_common.h
++++ b/include/configs/vexpress_common.h
+@@ -28,6 +28,10 @@
+ #ifndef __VEXPRESS_COMMON_H
+ #define __VEXPRESS_COMMON_H
+ 
++#define CONFIG_SYS_NO_FLASH
++#define CONFIG_ENV_IS_NOWHERE
++#define CONFIG_ENV_SIZE 0x00040000
++
+ /* Definitions copied from linux kernel: arch/arm/mach-vexpress/include/mach/motherboard.h */
+ #ifdef CONFIG_VEXPRESS_ORIGINAL_MEMORY_MAP
+ /* CS register bases for the original memory map. */
+@@ -155,7 +159,7 @@
+ #define CONFIG_PL011_CLOCK		24000000
+ #define CONFIG_PL01x_PORTS		{(void *)CONFIG_SYS_SERIAL0, \
+ 					 (void *)CONFIG_SYS_SERIAL1}
+-#define CONFIG_CONS_INDEX		0
++#define CONFIG_CONS_INDEX		1
+ 
+ #define CONFIG_BAUDRATE			38400
+ #define CONFIG_SYS_BAUDRATE_TABLE	{ 9600, 19200, 38400, 57600, 115200 }
+@@ -169,7 +173,7 @@
+ #define CONFIG_MENU
+ #define CONFIG_CMD_ELF
+ #define CONFIG_CMD_ENV
+-#define CONFIG_CMD_FLASH
++// #define CONFIG_CMD_FLASH
+ #define CONFIG_CMD_IMI
+ #define CONFIG_CMD_MEMORY
+ #define CONFIG_CMD_NET
+@@ -231,13 +235,7 @@
+ #define CONFIG_SYS_INIT_SP_ADDR		CONFIG_SYS_GBL_DATA_OFFSET
+ 
+ /* Basic environment settings */
+-#define CONFIG_BOOTCOMMAND \
+-	"if mmc rescan ${mmcdev}; then " \
+-		"if run loadbootscript; then " \
+-			"run bootscript; " \
+-		"fi; " \
+-	"fi; " \
+-	"run bootflash;"
++#define CONFIG_BOOTCOMMAND
+ 
+ #ifdef CONFIG_VEXPRESS_ORIGINAL_MEMORY_MAP
+ #define CONFIG_PLATFORM_ENV_SETTINGS \
+@@ -260,24 +258,14 @@
+ #endif
+ #define CONFIG_EXTRA_ENV_SETTINGS \
+ 		CONFIG_PLATFORM_ENV_SETTINGS \
+-		"console=ttyAMA0,38400n8\0" \
+-		"dram=1024M\0" \
+-		"root=/dev/sda1 rw\0" \
+-		"mtd=armflash:1M@0x800000(uboot),7M@0x1000000(kernel)," \
+-			"24M@0x2000000(initrd)\0" \
+-		"flashargs=setenv bootargs root=${root} console=${console} " \
+-			"mem=${dram} mtdparts=${mtd} mmci.fmax=190000 " \
+-			"devtmpfs.mount=0  vmalloc=256M\0" \
+-		"bootflash=run flashargs; " \
+-			"cp ${ramdisk_addr} ${ramdisk_addr_r} ${maxramdisk}; " \
+-			"bootm ${kernel_addr} ${ramdisk_addr_r}\0" \
+-		"mmcdev=0\0" \
+-		"bootscr=boot.scr\0" \
+-		"loadbootscript=fatload mmc ${mmcdev} ${loadaddr} ${bootscr}\0" \
+-		"bootscript=echo Running bootscript from mmc ...; " \
+-			"source ${loadaddr}\0"
++		"bootargs=root=/dev/mmcblk0 rw init=/bin/sh console=ttyAMA1,38400n8 mem=1024M ip=dhcp\0" \
++		"ipaddr=10.0.2.15\0" \
++		"netmask=255.255.0.0\0" \
++		"serverip=10.0.2.2\0" \
++		"loadsafeg=tftp 0x60000000 nt.bin; tftp 0x80000000 safeg.bin; tftp 0x81000000 t.bin; go 0x80000000\0"
+ 
+ /* FLASH and environment organization */
++#if 0
+ #define PHYS_FLASH_SIZE			0x04000000	/* 64MB */
+ #define CONFIG_SYS_FLASH_CFI		1
+ #define CONFIG_FLASH_CFI_DRIVER		1
+@@ -316,6 +304,7 @@
+ #define CONFIG_SYS_FLASH_EMPTY_INFO	/* flinfo indicates empty blocks */
+ #define CONFIG_SYS_FLASH_BANKS_LIST	{ CONFIG_SYS_FLASH_BASE0, \
+ 					  CONFIG_SYS_FLASH_BASE1 }
++#endif
+ 
+ /* Monitor Command Prompt */
+ #define CONFIG_SYS_CBSIZE		512	/* Console I/O Buffer Size */
+-- 
+1.7.9.5
+

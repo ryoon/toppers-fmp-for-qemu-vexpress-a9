@@ -2,12 +2,12 @@
  *  TOPPERS/FMP Kernel
  *      Toyohashi Open Platform for Embedded Real-Time Systems/
  *      Flexible MultiProcessor Kernel
- * 
+ *
  *  Copyright (C) 2000-2004 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
- *  Copyright (C) 2006-2011 by Embedded and Real-Time Systems Laboratory
+ *  Copyright (C) 2006-2012 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
- * 
+ *
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
  *  ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
  *  変・再配布（以下，利用と呼ぶ）することを無償で許諾する．
@@ -30,14 +30,14 @@
  *      また，本ソフトウェアのユーザまたはエンドユーザからのいかなる理
  *      由に基づく請求からも，上記著作権者およびTOPPERSプロジェクトを
  *      免責すること．
- * 
+ *
  *  本ソフトウェアは，無保証で提供されているものである．上記著作権者お
  *  よびTOPPERSプロジェクトは，本ソフトウェアに関して，特定の使用目的
  *  に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
- * 
- *  @(#) $Id: core_support.S 798 2011-04-05 05:35:37Z ertl-honda $
+ *
+ *  @(#) $Id: core_support.S 971 2012-12-07 06:56:32Z ertl-sangorrin $
  */
 
 /*
@@ -48,15 +48,17 @@
 #define TOPPERS_ASM_MACRO
 #define UINT_C(val)		(val)		/* uint_t型の定数を作るマクロ */
 #define ULONG_C(val)	(val)		/* ulong_t型の定数を作るマクロ */
+
 #include "kernel_impl.h"
 #include "offset.h"
+#include "target_asm.inc"
 
 /*
  * 例外ベクタ
  */
-    .section .vector,"a"
-    .global vector_table
-vector_table:
+    ASECTION(vector)
+    AGLOBAL(vector_table)
+ALABEL(vector_table)
     ldr pc, reset_vector       /* リセット             */
     ldr pc, undef_vector       /* 未定義命令           */
     ldr pc, swi_vector         /* ソフトウェア割込み   */
@@ -71,22 +73,22 @@ vector_table:
  *  例外ベクタの命令から参照される
  *  ジャンプ先アドレス
  */
-    .global vector_ref_tbl
-vector_ref_tbl:
-reset_vector:
-    .long   start
-undef_vector:
-    .long   undef_handler
-swi_vector:
-    .long   swi_handler
-prefech_vector:
-    .long   prefetch_handler
-data_abort_vector:
-    .long   data_abort_handler
-irq_vector:
-    .long   irq_handler
-fiq_vector:
-    .long   fiq_handler
+    AGLOBAL(vector_ref_tbl)
+ALABEL(vector_ref_tbl)
+ALABEL(reset_vector)
+    ALONG   start
+ALABEL(undef_vector)
+    ALONG   undef_handler
+ALABEL(swi_vector)
+    ALONG   swi_handler
+ALABEL(prefech_vector)
+    ALONG   prefetch_handler
+ALABEL(data_abort_vector)
+    ALONG   data_abort_handler
+ALABEL(irq_vector)
+    ALONG   irq_handler
+ALABEL(fiq_vector)
+    ALONG   fiq_handler
 
 #include "target_asm.inc"
 
@@ -94,10 +96,10 @@ fiq_vector:
  *  タスクディスパッチャ
  *
  */
-    .text
-    .align 2
-    .globl dispatch
-dispatch:
+    ATEXT
+    AALIGN(2)
+    AGLOBAL(dispatch)
+ALABEL(dispatch)
     /*
      *  このルーチンは，タスクコンテキスト・CPUロック状態・ディスパッチ
      *  許可状態・（モデル上の）割込み優先度マスク全解除状態で呼び出さ
@@ -111,7 +113,7 @@ dispatch:
     str    r2, [r1,#TCB_pc]             /* 実行再開番地を保存 */
     b      dispatcher
 
-dispatch_r:
+ALABEL(dispatch_r)
     ldmfd sp!,{r4 - r11,lr}     /* レジスタの復帰 */
     /*
      *  タスク例外処理ルーチンの起動
@@ -127,17 +129,17 @@ dispatch_r:
     ldr    r1, [r0,#PCB_ipmflg] /* ipmflgがfalseであればリターン */
     tst    r1, r1
     bne   dispatch_call_texrtn  /* タスク例外ルーチンの呼び出し */
-dispatch_r_1:
+ALABEL(dispatch_r_1)
     bx    lr
 
     /*
      *  自タスクのマイグレーション
      *  引数(r0)にマイグレーション先のプロセッサが入っているため破壊しないこと
      */
-    .text
-    .align 2
-    .globl dispatch_and_migrate
-dispatch_and_migrate:
+    ATEXT
+    AALIGN(2)
+    AGLOBAL(dispatch_and_migrate)
+ALABEL(dispatch_and_migrate)
     stmfd  sp!, {r4 - r11,lr}           /* レジスタの保存 */
     my_pcb r2, r1                       /* p_runtskを読み込む */
     ldr    r1, [r2,#PCB_p_runtsk]
@@ -151,19 +153,19 @@ dispatch_and_migrate:
      *  現在のコンテキストを捨てマイグレーション
      *  引数(r0)にマイグレーション先のプロセッサが入っているため破壊しないこと
      */
-    .text
-    .align 2
-    .globl exit_and_migrate
-exit_and_migrate:
-    my_pcb r2, r1                       
+    ATEXT
+    AALIGN(2)
+    AGLOBAL(exit_and_migrate)
+ALABEL(exit_and_migrate)
+    my_pcb r2, r1
     ldr    sp, [r2,#PCB_istkpt]         /* 非タスクコンテキスト用スタックへ切り替え */
     b      exit_and_migrate_self        /* 自タスクのexitとマイグレーションルーチンへ */
 
 /*
  *  ディスパッチャの動作開始（cpu_support.S）
  */
-    .globl start_dispatch
-start_dispatch:
+    AGLOBAL(start_dispatch)
+ALABEL(start_dispatch)
     /*
      *  このルーチンは，カーネル起動時に，すべての割込みを禁止した状態
      *  （割込みロック状態と同等）で呼び出される．また，非タスクコンテキ
@@ -178,7 +180,7 @@ start_dispatch:
      *  スパッチ許可状態になっている．
      *
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_CPULOCK|CPSR_ALWAYS_SET) /* CPUロック状態へ */
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET) /* CPUロック状態へ */
     my_pcb r0, r1                          /* 例外（割込み/CPU例外）のネスト回数 */
     mov   r1, #0                           /* を0に                              */
     str   r1, [r0, #PCB_excpt_nest_count]
@@ -187,15 +189,15 @@ start_dispatch:
 /*
  *  現在のコンテキストを捨ててディスパッチ
  */
-    .globl exit_and_dispatch
-exit_and_dispatch:
+    AGLOBAL(exit_and_dispatch)
+ALABEL(exit_and_dispatch)
     /* ディスパッチャ本体（dispatcher）へ */
     my_pcb r0, r1                       /* my_pcbを読み込む */
 
 /*
  *  ディスパッチャ本体
  */
-dispatcher:
+ALABEL(dispatcher)
     /*
      *  このルーチンは，タスクコンテキスト・CPUロック状態・ディスパッチ
      *  許可状態・（モデル上の）割込み優先度マスク全解除状態で呼び出さ
@@ -211,7 +213,7 @@ dispatcher:
     bl    log_dsp_enter
     ldmfd sp!, {r0}
 #endif /* LOG_DSP_ENTER */
-dispatcher_0:
+ALABEL(dispatcher_0)
     ldr   r1, [r0, #PCB_p_schedtsk] /* p_schedtskをp_runtskに */
     str   r1, [r0, #PCB_p_runtsk]
     cmp   r1, #0            /* p_runtskがNULLならdispatcher_1へ */
@@ -225,17 +227,17 @@ dispatcher_0:
 #endif /* LOG_DSP_LEAVE */
     ldr   pc, [r1,#TCB_pc]  /* 実行再開番地を復帰 */
 
-dispatcher_1:
+ALABEL(dispatcher_1)
     /*
      * CPUロック状態の解除と，非タスクコンテキスト実行状態への
      * 準備をする
      */
     ldr   sp, [r0,#PCB_istkpt]         /* 非タスクコンテキストのスタックへ */
-    add   r2, r0, #PCB_reqflg          /* r2 <- reqflg */
-    add   r3, r0, #PCB_excpt_nest_count 
-    mov   r0, #0
-    mov   r1, #1
-dispatcher_2:
+    add   r6, r0, #PCB_reqflg          /* r6 <- reqflg */
+    add   r7, r0, #PCB_excpt_nest_count
+    mov   r4, #0
+    mov   r5, #1
+ALABEL(dispatcher_2)
     /*
      *  割込みを許可し，非タスクコンテキスト実行状態とし割込みを待つ．
      *
@@ -257,24 +259,37 @@ dispatcher_2:
      *  異なる手順が必要な場合がある．
      *  そのようなターゲットでは，ターゲット依存において，TOPPERS_CUSTOM_IDLE
      *  を定義し，アセンブラマクロとして，toppers_asm_custom_idle を用意
-     *  すればよい．toppers_asm_custom_idle の記述にあたっては，次のレジ
-     *  スタは使用できない．
-     *     r0, r1, r2, r3, s
+     *  すればよい．
+     *
+     *  なお，toppers_asm_custom_idle の記述にあたっては，次のレジスタは
+     *  toppers_asm_custom_idleの前後で使用するため，
+     *  toppers_asm_custom_idle 内で使用する場合は，前後で保存復帰すること．
+     *  これらのレジスタは Calee saved レジスタであるため，
+     *  toppers_asm_custom_idle として関数呼び出しをした場合は，呼び出した
+     *  関数で自動的に保存復帰されるため，アセンブラレベルでの保存復帰は必
+     *  要ない．
+     *
+     *  レジスタ : 内容
+     *   r4      : '0'
+     *   r5      : '1'
+     *   r6      : reqflgのアドレス
+     *   r7      : excpt_nest_countのアドレス
+     *   sp      : 非タスクコンテキスト用のスタックの先頭アドレス．
      */
-    str   r1, [r3]                          /* excpt_nest_count = 1 */
+    str   r5, [r7]                          /* excpt_nest_count = 1 */
 
 #ifdef TOPPERS_CUSTOM_IDLE
     toppers_asm_custom_idle
 #else
-    msr   cpsr, #(CPSR_SVC|CPSR_ALWAYS_SET) /* 割り込み許可(システムモード) */
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_ALWAYS_SET) /* 割り込み許可(システムモード) */
     nop
-    msr   cpsr, #(CPSR_SVC|CPSR_CPULOCK|CPSR_ALWAYS_SET) /* CPUロック(システムモード) */
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET) /* CPUロック(システムモード) */
 #endif /* TOPPERS_CUSTOM_IDLE */
-    ldr   r6, [r2]        /* reqflgがfalseならdispatcher_2へ */
-    cmp   r6, #0
+    ldr   r8, [r6]        /* reqflgがfalseならdispatcher_2へ */
+    cmp   r8, #0
     beq   dispatcher_2
-    str   r0, [r2]        /* reqflgをFALSEに */
-    str   r0, [r3]        /* excpt_nest_count = 0 */
+    str   r4, [r6]        /* reqflgをFALSEに */
+    str   r4, [r7]        /* excpt_nest_count = 0 */
     my_pcb r0, r1         /* my_pcbを読み込む */
     b     dispatcher_0
 
@@ -284,11 +299,11 @@ dispatcher_2:
  *
  *  モードとスタックを非タスクコンテキスト用に切り替え．
  */
-    .globl call_exit_kernel
-call_exit_kernel:
-    msr  cpsr, #(CPSR_SVC|CPSR_ALWAYS_SET|CPSR_IRQ_BIT|CPSR_FIQ_BIT) 
-    my_pcb r2, r1                       
-    ldr    sp, [r2,#PCB_istkpt]         /* 非タスクコンテキスト用スタックへ切り替え */ 
+    AGLOBAL(call_exit_kernel)
+ALABEL(call_exit_kernel)
+    msr  cpsr_cxsf, #(CPSR_SVC AOR CPSR_ALWAYS_SET AOR CPSR_IRQ_BIT AOR CPSR_FIQ_BIT)
+    my_pcb r2, r1
+    ldr    sp, [r2,#PCB_istkpt]         /* 非タスクコンテキスト用スタックへ切り替え */
     b     exit_kernel
 
 /*
@@ -296,10 +311,10 @@ call_exit_kernel:
  *
  *  dispatcherから呼び出されるため，TCBのアドレスはr1に入っている
  */
-    .text
-    .globl start_r
-start_r:
-    msr   cpsr, #(CPSR_SVC|CPSR_ALWAYS_SET) /* CPUロック解除状態に */
+    ATEXT
+    AGLOBAL(start_r)
+ALABEL(start_r)
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_ALWAYS_SET) /* CPUロック解除状態に */
     ldr   lr, =ext_tsk                      /* 戻り番地設定 */
     ldr   r2, [r1, #TCB_p_tinib]            /* p_runtsk->p_tinibをr2に  */
     ldr   r0, [r2, #TINIB_exinf]            /* exinfを引数レジスタr0に  */
@@ -312,16 +327,16 @@ start_r:
  *  共通部で用意されている ipi_handler を呼び出さずにディスパッチャを
  *  呼び出す．最も外側のルーチンでない場合は，reqflgをセットする．
  *  自PCBのアドレスがr0に入っていることを想定している．
- */    
+ */
 #ifdef USE_IPI_DIS_HANDER_BYPASS
-    .global ret_int_ipi_dispatch
-ret_int_ipi_dispatch:
+    AGLOBAL(ret_int_ipi_dispatch)
+ALABEL(ret_int_ipi_dispatch)
     ldr   r2, [r0,#PCB_excpt_nest_count] /* 戻り先がタスクコンテキストなら */
     cmp   r2, #0                         /* ret_int_4へ */
     beq   ret_int_4
     mov   r1, #1                         /* 戻り先が非タスクコンテキストなら */
     str   r1, [r0, #PCB_reqflg]          /* reqflgをtrueにしてリターン       */
-    b     ret_int_2                
+    b     ret_int_2
 #endif /* USE_IPI_DIS_HANDER_BYPASS */
 
 /*
@@ -333,10 +348,10 @@ ret_int_ipi_dispatch:
  *  r0にCPU例外発生時に取得しているスピンロックの値を入れた状態
  *  で呼び出される．
  */
-    .text
-    .global ret_exc
-ret_exc:
-    /* 
+    ATEXT
+    AGLOBAL(ret_exc)
+ALABEL(ret_exc)
+    /*
      * CPU例外発生時にスピンロックを取得していれば，スピンロック
      * の解放は行わない．
      */
@@ -351,15 +366,15 @@ ret_exc:
  *  カーネル管理の割込みを禁止，スタックを割込み前のスタックにした
  *  状態で呼び出される．
  */
-    .global ret_int
-ret_int:
+    AGLOBAL(ret_int)
+ALABEL(ret_int)
     /*
      *  スピンロックを取得していれば解除する
      */
     my_pcb r0, r1  /* 引数 */
     bl    force_unlock_spin
 
-ret_int_1:
+ALABEL(ret_int_1)
     /*
      *  例外・割込みのネストカウント（excpt_nest_count)のデクリメント
      */
@@ -380,24 +395,24 @@ ret_int_1:
     cmp   r1, #0
     bne   ret_int_3
 
-    .global ret_int_2
-ret_int_2:
+    AGLOBAL(ret_int_2)
+ALABEL(ret_int_2)
     /*
      *  割込み処理からのリターンにより，CPUロック解除状態に移行しなければ
-     *  ならない．    
+     *  ならない．
      *  ARMでは，CPSRのIRQビットでCPUロック解除状態とするため，単にリターン
      *  すればよい．
      */
 #if (__TARGET_ARCH_ARM == 4) || (__TARGET_ARCH_ARM == 5)
     ldmfd sp!,{r1}              /* CPSRの復帰処理 */
-    msr   spsr, r1              /* 戻り先のcpsrをspsrに設定 */
+    msr   spsr_cxsf, r1              /* 戻り先のcpsrをspsrに設定 */
     ldmfd sp!,{r0-r3,ip,lr,pc}^ /* コンテキストの復帰，^付きなので、cpsr <- spsr */
 #else /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
     ldmfd sp!,{r0-r3,ip,lr}
     rfeia sp!
 #endif /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
 
-ret_int_3:
+ALABEL(ret_int_3)
     /*
      *  ここでは，戻り先がタスクであり，スタックは，タスクスタックの上
      *  にスクラッチレジスタのみが保存された状態になっている．また，
@@ -423,7 +438,7 @@ ret_int_3:
      *  設定する．
      */
 
-ret_int_4:
+ALABEL(ret_int_4)
     /*
      *  dspflgがfalseである場合と，p_runtskとp_schedtskが同じ場合には，
      *  ディスパッチを行わない．このチェックが必要なのは，タスク例外処
@@ -447,9 +462,9 @@ ret_int_4:
     str   r2, [r1,#TCB_pc]
     b     dispatcher
 
-ret_int_r: 
+ALABEL(ret_int_r)
     ldmfd sp!, {r4-r11}       /* レジスタの復帰 */
-ret_int_r_1:
+ALABEL(ret_int_r_1)
     /*
      *  enatexがtrueで，texptnが0でなく，ipmflgがtrueであれば，タスク
      *  例外処理ルーチンを呼び出す．
@@ -465,15 +480,15 @@ ret_int_r_1:
     ldr    r1, [r0,#PCB_ipmflg] /* ipmflgがfalseであればリターン */
     tst    r1, r1
     blne  dispatch_call_texrtn   /* タスク例外ルーチンの呼び出し */
-ret_int_r_2:
+ALABEL(ret_int_r_2)
     /*
      *  割込み処理からのリターンにより，CPUロック解除状態に移行するよ
      *  うにする．ARMはCPSRのIRQビットによってCPUロック状態を表してい
      *  るため，そのままリターンすればよい．
-     */ 
+     */
 #if (__TARGET_ARCH_ARM == 4) || (__TARGET_ARCH_ARM == 5)
     ldmfd sp!, {r0}             /* spsr を復帰 */
-    msr   spsr,r0               /* 戻り先のcpsrをspsrに設定 */
+    msr   spsr_cxsf,r0          /* 戻り先のcpsrをspsrに設定 */
     ldmfd sp!,{r0-r3,ip,lr,pc}^ /* タスクに復帰 ^付きなので、cpsr <- spsr */
 #else /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
     ldmfd sp!,{r0-r3,ip,lr}
@@ -484,43 +499,43 @@ ret_int_r_2:
  * CPU例外ハンドラ
  *
  * CPU例外ハンドラは，非タスクコンテキストで実行する．
- * 
+ *
  */
 
 /*
  *  未定義命令 例外ハンドラ
  */
-    .text
-    .align 2
-    .global undef_handler
-undef_handler:
+    ATEXT
+    AALIGN(2)
+    AGLOBAL(undef_handler)
+ALABEL(undef_handler)
 #if (__TARGET_ARCH_ARM == 4) || (__TARGET_ARCH_ARM == 5)
-    /* 
+    /*
      *  例外発生前の動作時モード(スーパーバイザーモード)へ
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_CPULOCK|CPSR_ALWAYS_SET)
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
     stmfd sp!, {r0-r3,ip,lr,pc} /* pcはダミー */
 
     /*
      * spsrと戻り番地を取得するために未定義モードへ
      */
-    msr   cpsr, #(CPSR_UND|CPSR_CPULOCK|CPSR_ALWAYS_SET)
+    msr   cpsr_cxsf, #(CPSR_UND AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
     mov   r0, lr
     mrs   r1, spsr
 #else /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
-    /* 
+    /*
      * lr(戻り先) spsr(cpsr_svc)をスーパーバイザーモードのスタックへ
      * 保存．
      */
-    srsdb #CPSR_SVC! 
+    srsdb #CPSR_SVC!
 
-    /* 
+    /*
      *  例外発生前の動作時モード(スーパーバイザーモード)へ
      *  割込みロック状態，CPUロック状態はCPU例外発生時の
      *  状態を継承する．
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_CPULOCK|CPSR_ALWAYS_SET)    
-    stmfd sp!, {r0-r3,ip,lr} 
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
+    stmfd sp!, {r0-r3,ip,lr}
 #endif /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
 
     mov   r2, #EXCH_NO_UNDEF
@@ -529,33 +544,33 @@ undef_handler:
 /*
  *  SWI 例外ハンドラ
  */
-    .text
-    .align 2
-    .global swi_handler
-swi_handler:
+    ATEXT
+    AALIGN(2)
+    AGLOBAL(swi_handler)
+ALABEL(swi_handler)
 #if (__TARGET_ARCH_ARM == 4) || (__TARGET_ARCH_ARM == 5)
-    /* 
+    /*
      *  例外発生前の動作時モード(スーパーバイザーモード)へ
      *  元々スーパーバイザーモードだが，CPUロック状態とする
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_CPULOCK|CPSR_ALWAYS_SET)
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
     stmfd sp!, {r0-r3,ip,lr,pc} /* pcはダミー */
     mov   r0, lr
     mrs   r1, spsr
 #else /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
-    /* 
+    /*
      * lr(戻り先) spsr(cpsr_svc)をスーパーバイザーモードのスタックへ
      * 保存．
      */
-    srsdb #CPSR_SVC! 
+    srsdb #CPSR_SVC!
 
-    /* 
+    /*
      *  例外発生前の動作時モード(スーパーバイザーモード)へ
      *  割込みロック状態，CPUロック状態はCPU例外発生時の
      *  状態を継承する．
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_CPULOCK|CPSR_ALWAYS_SET)    
-    stmfd sp!, {r0-r3,ip,lr} 
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
+    stmfd sp!, {r0-r3,ip,lr}
 #endif /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
 
     mov   r2, #EXCH_NO_SWI
@@ -564,35 +579,35 @@ swi_handler:
 /*
  *  プリフェッチアボード 例外ハンドラ
  */
-    .text
-    .align 2
-    .global prefetch_handler
-prefetch_handler:
+    ATEXT
+    AALIGN(2)
+    AGLOBAL(prefetch_handler)
+ALABEL(prefetch_handler)
 #if (__TARGET_ARCH_ARM == 4) || (__TARGET_ARCH_ARM == 5)
-    /* 
+    /*
      *  例外発生前の動作時モード(スーパーバイザーモード)へ
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_CPULOCK|CPSR_ALWAYS_SET)
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
     stmfd sp!, {r0-r3,ip,lr,pc} /* pcはダミー */
 
     /*
      * spsrと戻り番地を取得するためにアボートモードへ
      */
-    msr   cpsr, #(CPSR_ABT|CPSR_CPULOCK|CPSR_ALWAYS_SET)
+    msr   cpsr_cxsf, #(CPSR_ABT AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
     mov   r0, lr
     mrs   r1, spsr
 #else /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
-    /* 
+    /*
      * lr(戻り先) spsr(cpsr_svc)をスーパーバイザーモードのスタックへ
      * 保存．
      */
-    srsdb #CPSR_SVC! 
+    srsdb #CPSR_SVC!
 
-    /* 
+    /*
      *  例外発生前の動作時モード(スーパーバイザーモード)へ
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_CPULOCK|CPSR_ALWAYS_SET)    
-    stmfd sp!, {r0-r3,ip,lr} 
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
+    stmfd sp!, {r0-r3,ip,lr}
 #endif /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
 
     mov   r2, #EXCH_NO_PABORT
@@ -601,35 +616,35 @@ prefetch_handler:
 /*
  *  データアボード 例外ハンドラ
  */
-    .text
-    .align 2
-    .global data_abort_handler
-data_abort_handler:
+    ATEXT
+    AALIGN(2)
+    AGLOBAL(data_abort_handler)
+ALABEL(data_abort_handler)
 #if (__TARGET_ARCH_ARM == 4) || (__TARGET_ARCH_ARM == 5)
-    /* 
+    /*
      *  例外発生前の動作時モード(スーパーバイザーモード)へ
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_CPULOCK|CPSR_ALWAYS_SET)
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
     stmfd sp!, {r0-r3,ip,lr,pc} /* pcはダミー */
 
     /*
      * spsrと戻り番地を取得するためにアボートモードへ
      */
-    msr   cpsr, #(CPSR_ABT|CPSR_CPULOCK|CPSR_ALWAYS_SET)
+    msr   cpsr_cxsf, #(CPSR_ABT AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
     mov   r0, lr
     mrs   r1, spsr
 #else /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
-    /* 
+    /*
      * lr(戻り先) spsr(cpsr_svc)をスーパーバイザーモードのスタックへ
      * 保存．
      */
-    srsdb #CPSR_SVC! 
+    srsdb #CPSR_SVC!
 
-    /* 
+    /*
      *  例外発生前の動作時モード(スーパーバイザーモード)へ
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_CPULOCK|CPSR_ALWAYS_SET)    
-    stmfd sp!, {r0-r3,ip,lr} 
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
+    stmfd sp!, {r0-r3,ip,lr}
 #endif /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
 
     mov   r2, #EXCH_NO_DABORT
@@ -640,35 +655,35 @@ data_abort_handler:
 /*
  *  FIQ 例外ハンドラ
  */
-    .text
-    .align 2
-    .global fiq_handler
-fiq_handler:
+    ATEXT
+    AALIGN(2)
+    AGLOBAL(fiq_handler)
+ALABEL(fiq_handler)
 #if (__TARGET_ARCH_ARM == 4) || (__TARGET_ARCH_ARM == 5)
-    /* 
+    /*
      *  例外発生前の動作時モード(スーパーバイザーモード)へ
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_FIQ_BIT|CPSR_CPULOCK|CPSR_ALWAYS_SET)
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_FIQ_BIT AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
     stmfd sp!, {r0-r3,ip,lr,pc} /* pcはダミー */
 
     /*
      * spsrと戻り番地を取得するためにFIQモードへ
      */
-    msr   cpsr, #(CPSR_FIQ|CPSR_FIQ_BIT|CPSR_CPULOCK|CPSR_ALWAYS_SET)
+    msr   cpsr_cxsf, #(CPSR_FIQ AOR CPSR_FIQ_BIT AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
     mov   r0, lr
     mrs   r1, spsr
 #else /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
-    /* 
+    /*
      * lr(戻り先) spsr(cpsr_svc)をスーパーバイザーモードのスタックへ
      * 保存．
      */
-    srsdb #CPSR_SVC! 
+    srsdb #CPSR_SVC!
 
-    /* 
+    /*
      *  例外発生前の動作時モード(スーパーバイザーモード)へ
      */
-    msr   cpsr, #(CPSR_SVC|CPSR_CPULOCK|CPSR_ALWAYS_SET)    
-    stmfd sp!, {r0-r3,ip,lr} 
+    msr   cpsr_cxsf, #(CPSR_SVC AOR CPSR_CPULOCK AOR CPSR_ALWAYS_SET)
+    stmfd sp!, {r0-r3,ip,lr}
 #endif /* (__TARGET_ARCH_ARM == 6) || (__TARGET_ARCH_ARM == 7) */
 
     mov   r2, #EXCH_NO_FIQ
@@ -678,28 +693,30 @@ fiq_handler:
 /*
  *  微少時間待ち
  */
-    .globl _sil_dly_nse
-_sil_dly_nse:
+#ifndef TOPPERS_CUSTOM_SILDLYNSE
+    AGLOBAL(_sil_dly_nse)
+ALABEL(_sil_dly_nse)
     sub   r0, r0, #SIL_DLY_TIM1
     cmp   r0, #0
     bgt   _sil_dly_nse1
     bxle  lr
-_sil_dly_nse1:
+ALABEL(_sil_dly_nse1)
     sub   r0, r0, #SIL_DLY_TIM2
     cmp   r0, #0
     bgt   _sil_dly_nse1
     bxle  lr
+#endif /* TOPPERS_CUSTOM_SILDLYNSE */
 
 #ifdef __thumb__
-    .text
-    .align 2
-    .global current_sr
-current_sr:
+    ATEXT
+    AALIGN(2)
+    AGLOBAL(current_sr)
+ALABEL(current_sr)
     mrs   r0, cpsr
     bx    lr
 
-   .global set_sr
-set_sr:
-    msr   cpsr, r0
+   AGLOBAL(set_sr)
+ALABEL(set_sr)
+    msr   cpsr_cxsf, r0
     bx    lr
 #endif /* __thumb__ */

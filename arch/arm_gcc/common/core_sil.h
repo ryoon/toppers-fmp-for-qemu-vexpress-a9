@@ -1,12 +1,12 @@
 /*
  *  TOPPERS Software
  *      Toyohashi Open Platform for Embedded Real-Time Systems
- * 
+ *
  *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
  *                              Toyohashi Univ. of Technology, JAPAN
  *  Copyright (C) 2004-2009 by Embedded and Real-Time Systems Laboratory
  *              Graduate School of Information Science, Nagoya Univ., JAPAN
- * 
+ *
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
  *  ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
  *  変・再配布（以下，利用と呼ぶ）することを無償で許諾する．
@@ -29,14 +29,14 @@
  *      また，本ソフトウェアのユーザまたはエンドユーザからのいかなる理
  *      由に基づく請求からも，上記著作権者およびTOPPERSプロジェクトを
  *      免責すること．
- * 
+ *
  *  本ソフトウェアは，無保証で提供されているものである．上記著作権者お
  *  よびTOPPERSプロジェクトは，本ソフトウェアに関して，特定の使用目的
  *  に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
- * 
- *  @(#) $Id: core_sil.h 789 2011-03-03 07:20:01Z ertl-honda $
+ *
+ *  @(#) $Id: core_sil.h 971 2012-12-07 06:56:32Z ertl-sangorrin $
  */
 
 /*
@@ -47,6 +47,11 @@
 #define TOPPERS_CORE_SIL_H
 
 #ifndef TOPPERS_MACRO_ONLY
+
+/*
+ *  メモリが変更されることをコンパイラに伝えるためのマクロ
+ */
+#define ARM_MEMORY_CHANGED Asm("":::"memory")
 
 #ifdef __thumb__
 /*
@@ -119,12 +124,14 @@ TOPPERS_set_fiq_irq(uint32_t TOPPERS_irq_fiq_mask)
 /*
  *  微少時間待ち
  */
+#ifndef TOPPERS_CUSTOM_SILDLYNSE
 Inline void
 sil_dly_nse(ulong_t dlytim)
 {
-	register uint32_t r0 asm("r0") = (uint32_t) dlytim;    
+	register uint32_t r0 asm("r0") = (uint32_t) dlytim;
 	Asm("bl _sil_dly_nse" : "=g"(r0) : "0"(r0) : "lr","cc");
 }
+#endif /* TOPPERS_CUSTOM_SILDLYNSE */
 
 #endif /* TOPPERS_MACRO_ONLY */
 
