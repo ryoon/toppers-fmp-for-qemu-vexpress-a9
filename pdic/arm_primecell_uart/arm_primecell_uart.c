@@ -43,6 +43,7 @@
  */
 
 #include <sil.h>
+#include "target_kernel.h"
 #include "target_syssvc.h"
 #include "arm_primecell_uart.h"
 
