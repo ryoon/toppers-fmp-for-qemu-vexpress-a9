@@ -92,7 +92,7 @@ sample/sample1.h
 sample/logtrace_test1.c
 sample/logtrace_test1.cfg
 sample/logtrace_test1.h
-       
+
 syssvc/banner.c
 syssvc/banner.cfg
 syssvc/banner.h

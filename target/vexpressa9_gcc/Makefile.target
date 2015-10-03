@@ -1,0 +1,111 @@
+#
+#  Versatile Express Cortex-A9 porting
+#  2012 (c) Daniel Sangorrin (daniel.sangorrin@gmail.com)
+#
+
+#  GNU toolchain prefix (change if necessary)
+GCC_TARGET = arm-none-eabi
+
+#  Board name
+BOARD = vexpress
+
+#  MPCore type
+MPCORE_TYPE = CA9
+
+#  When using SafeG, the application's Makefile can define the variable
+#  SAFEG as SECURE or NONSECURE for declaring the world in which it
+#  is supposed to run. When not using SafeG, NOSAFEG,  a suitable
+#  configuration will be chosen for FMP to run on the processor.
+ifeq ($(SAFEG),SECURE)
+# SECURE parameters: 0x81000000~, private timers, UART-1 (G_SYSLOG)
+# ----------------------------------------------------------
+BASE_ADDR      = 0x81000000
+SYSTIMER_TYPE  = CA9_PRIVATE_TIMER
+CDEFS         := $(CDEFS) -DTOPPERS_SAFEG_SECURE -DG_SYSLOG
+KERNEL_COBJS  := $(KERNEL_COBJS) chip_timer.o
+else
+ifeq ($(SAFEG),NONSECURE)
+# NONSECURE parameters: 0x60000000~. sp804 timer (global), UART-0 (G_SYSLOG)
+# ----------------------------------------------------------
+BASE_ADDR      = 0x60000000
+SYSTIMER_TYPE  = CA9_SP804_TIMER
+CDEFS         := $(CDEFS) -DTOPPERS_SAFEG_NONSECURE -DG_SYSLOG
+KERNEL_COBJS  := $(KERNEL_COBJS) sp804.o
+else
+# NOSAFEG parameters: 0x60000000~, private timers, UART-0123
+# ----------------------------------------------------------
+BASE_ADDR      = 0x60000000
+SYSTIMER_TYPE  = CA9_PRIVATE_TIMER
+CDEFS         := $(CDEFS) -DTOPPERS_NOSAFEG
+KERNEL_COBJS  := $(KERNEL_COBJS) chip_timer.o
+
+# NOSAFEG parameters: 0x60000000~, watchdog timers, UART-0123
+# ----------------------------------------------------------
+# BASE_ADDR      = 0x60000000
+# SYSTIMER_TYPE  = CA9_PRIVATE_WDT
+# CDEFS         := $(CDEFS) -DTOPPERS_NOSAFEG
+# KERNEL_COBJS  := $(KERNEL_COBJS) wdt.o
+
+# NOSAFEG parameters: 0x60000000~, sp804 timer (global), UART-0123
+# ----------------------------------------------------------
+# BASE_ADDR      = 0x60000000
+# SYSTIMER_TYPE  = CA9_SP804_TIMER
+# CDEFS         := $(CDEFS) -DTOPPERS_NOSAFEG
+# KERNEL_COBJS  := $(KERNEL_COBJS) sp804.o
+endif
+endif
+TEXT_START_ADDRESS=$(BASE_ADDR)
+
+# When using QEMU we may need special settings. For example, we are not
+# able to use the WFI instruction in the idle task
+ifeq ($(ENABLE_QEMU),true)
+CDEFS := $(CDEFS) -DTOPPERS_ENABLE_QEMU
+endif
+
+# When using U-BOOT to load FMP in QEMU
+ifeq ($(ENABLE_UBOOT),true)
+CDEFS := $(CDEFS) -DTOPPERS_ENABLE_UBOOT
+endif
+
+#  Compiler options
+INCLUDES := $(INCLUDES) -I$(TARGETDIR)
+COPTS    := $(COPTS) -mlittle-endian
+LDFLAGS  := $(LDFLAGS) -mlittle-endian
+CDEFS    := $(CDEFS) -DBASE_ADDR=$(BASE_ADDR) -D$(SYSTIMER_TYPE)
+
+#  Kernel definitions
+KERNEL_DIR   := $(KERNEL_DIR) $(TARGETDIR)
+KERNEL_COBJS := $(KERNEL_COBJS) target_config.o
+
+#  System services (e.g., serial logger)
+SYSSVC_DIR   := $(SYSSVC_DIR) $(TARGETDIR) $(SRCDIR)/pdic/arm_primecell_uart
+SYSSVC_COBJS := $(SYSSVC_COBJS) target_serial.o arm_primecell_uart.o
+
+#  Trace logger definitions
+ifeq ($(ENABLE_TRACE),true)
+      COPTS        := $(COPTS) -DTOPPERS_ENABLE_TRACE
+      KERNEL_DIR   := $(KERNEL_DIR) $(SRCDIR)/arch/logtrace
+      KERNEL_COBJS := $(KERNEL_COBJS) trace_config.o trace_dump.o
+endif
+
+#  Linker script
+LDSCRIPT = $(TARGETDIR)/vexpressa9.ld
+
+#  Startup code (linked directly from vexpressa9.ld)
+HIDDEN_OBJS = start.o
+
+$(HIDDEN_OBJS): %.o: %.S
+	$(CC) -c $(CFLAGS) $(KERNEL_CFLAGS) $<
+
+$(HIDDEN_OBJS:.o=.d): %.d: %.S
+	@$(PERL) $(SRCDIR)/utils/makedep -C $(CC) \
+		-O "$(CFLAGS) $(KERNEL_CFLAGS)" $< >> Makefile.depend
+
+LDFLAGS := -nostdlib $(LDFLAGS)
+
+#  Dependency timestamp
+kernel_cfg.timestamp: $(TARGETDIR)/target.tf
+$(OBJFILE): $(TARGETDIR)/target_check.tf
+
+#  Include the MPCore Makefile
+include $(SRCDIR)/arch/arm_gcc/mpcore/Makefile.chip
