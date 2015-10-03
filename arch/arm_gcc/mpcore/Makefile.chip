@@ -1,0 +1,66 @@
+#
+#  @(#) $Id: Makefile.chip 955 2012-10-30 07:31:22Z ertl-honda $
+#
+
+#
+#		Makefile のチップ依存部（MPCORE用）
+#
+
+#
+#  チップ名，コア名，開発環境名の定義
+#
+CHIP = mpcore
+PRC  = arm
+TOOL = gcc
+
+CHIPDIR = $(SRCDIR)/arch/$(PRC)_$(TOOL)/$(CHIP)
+
+#
+#  コンパイルオプション
+#
+INCLUDES := $(INCLUDES) -I$(CHIPDIR)
+COPTS := $(COPTS)
+LDFLAGS := $(LDFLAGS) -N
+
+#
+#  ARM11とCA9の切り分け
+#
+ifeq ($(MPCORE_TYPE),ARM11)
+	COPTS := $(COPTS) -mcpu=mpcore
+	LDFLAGS := $(LDFLAGS) -mcpu=mpcore
+	CDEFS := $(CDEFS) -D__TARGET_ARCH_ARM=6
+endif
+ifeq ($(MPCORE_TYPE),CA9)
+	COPTS := $(COPTS) -mcpu=cortex-a9
+	LDFLAGS := $(LDFLAGS) -mcpu=cortex-a9
+	CDEFS := $(CDEFS) -D__TARGET_ARCH_ARM=7
+endif
+
+
+#
+#  カーネルに関する定義
+#
+KERNEL_DIR := $(KERNEL_DIR) $(CHIPDIR)
+KERNEL_ASMOBJS := $(KERNEL_ASMOBJS) chip_support.o
+KERNEL_COBJS := $(KERNEL_COBJS) chip_config.o mpcore.o
+
+#
+#  依存関係の定義
+#
+kernel_cfg.timestamp: $(CHIPDIR)/chip.tf
+$(OBJFILE): $(CHIPDIR)/chip_check.tf
+
+#
+#  コンフィギュレータ関係の変数の定義
+#
+CFG_TABS := $(CFG_TABS) --cfg1-def-table $(CHIPDIR)/chip_def.csv
+
+#
+#  オフセットファイル生成のための定義
+#
+OFFSET_TF = $(CHIPDIR)/chip_offset.tf
+
+#
+#  ARM依存部のインクルード
+#
+include $(SRCDIR)/arch/$(PRC)_$(TOOL)/common/Makefile.core
