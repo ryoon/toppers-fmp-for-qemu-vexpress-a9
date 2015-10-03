@@ -63,7 +63,7 @@
 /*
  *  System log low-level character output
  */
-extern void target_fput_log(char_t c);
+extern void target_fput_log(char c);
 
 /*
  *  Number of UARTs (used in target_serial.cfg and arm_primecell_uart.c)

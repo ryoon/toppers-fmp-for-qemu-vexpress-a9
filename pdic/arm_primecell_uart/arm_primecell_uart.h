@@ -119,12 +119,12 @@ extern void arm_primecell_uart_cls_por(SIOPCB *siopcb);
 /*
  *  シリアルI/Oポートへの文字送信
  */
-extern bool_t arm_primecell_uart_snd_chr(SIOPCB *siopcb, char_t c);
+extern bool_t arm_primecell_uart_snd_chr(SIOPCB *siopcb, char c);
 
 /*
  * Put a character in polling mode
  */
-extern void arm_primecell_uart_pol_putc(ID siopid, char_t c);
+extern void arm_primecell_uart_pol_putc(ID siopid, char c);
 
 /*
  *  シリアルI/Oポートからの文字受信

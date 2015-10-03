@@ -55,7 +55,7 @@
 /*
  *  Target-dependent early system initialization functions
  */
-extern void vexpressa9_pol_putc(char_t c);
+extern void vexpressa9_pol_putc(char c);
 extern void vexpressa9_uart_reset(void);
 extern void vexpressa9_uart_init(intptr_t exinf);
 
@@ -77,7 +77,7 @@ extern void sio_isr(intptr_t siopid);
 /*
  *  Send a character through the serial port
  */
-extern bool_t sio_snd_chr(SIOPCB *siopcb, char_t c);
+extern bool_t sio_snd_chr(SIOPCB *siopcb, char c);
 
 /*
  *  Receive a character from the serial port

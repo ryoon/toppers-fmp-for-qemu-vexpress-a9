@@ -64,7 +64,7 @@ void vexpressa9_uart_reset(void)
         arm_primecell_uart_reset(my_siopid);
 }
 
-void vexpressa9_pol_putc(char_t c)
+void vexpressa9_pol_putc(char c)
 {
         arm_primecell_uart_pol_putc(my_siopid, c);
 }
@@ -126,7 +126,7 @@ sio_isr(intptr_t exinf)
  * Send a character through the serial port
  */
 bool_t
-sio_snd_chr(SIOPCB *siopcb, char_t c)
+sio_snd_chr(SIOPCB *siopcb, char c)
 {
 	return(arm_primecell_uart_snd_chr(siopcb, c));
 }

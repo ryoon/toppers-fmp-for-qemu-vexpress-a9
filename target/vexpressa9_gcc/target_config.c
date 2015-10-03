@@ -65,7 +65,7 @@ target_mprc_initialize(void)
  *  System log low-level (polling) character output
  */
 void
-target_fput_log(char_t c)
+target_fput_log(char c)
 {
         if (c == '\n') {
                 vexpressa9_pol_putc('\r');

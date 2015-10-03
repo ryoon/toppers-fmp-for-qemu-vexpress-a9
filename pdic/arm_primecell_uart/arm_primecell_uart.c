@@ -173,17 +173,17 @@ arm_primecell_uart_putready(SIOPCB *p_siopcb)
 /*
  *  受信した文字の取出し
  */
-Inline char_t
+Inline char
 arm_primecell_uart_getchar(SIOPCB *p_siopcb)
 {
-    return((char_t)sil_rew_mem(p_siopcb->siopinib->dr));
+    return((char)sil_rew_mem(p_siopcb->siopinib->dr));
 }
 
 /*
  *  送信する文字の書込み
  */
 Inline void
-arm_primecell_uart_putchar(SIOPCB *p_siopcb, char_t c)
+arm_primecell_uart_putchar(SIOPCB *p_siopcb, char c)
 {
     sil_wrw_mem(p_siopcb->siopinib->dr, c);
 }
@@ -267,7 +267,7 @@ arm_primecell_uart_openflag(ID siopid)
 void
 arm_primecell_uart_reset(ID siopid)
 {
-        char_t __attribute__((__unused__)) c;  /* for removing warning */
+        char __attribute__((__unused__)) c;  /* for removing warning */
         int index;
 
         index = INDEX_SIOP(siopid);
@@ -330,7 +330,7 @@ arm_primecell_uart_cls_por(SIOPCB *p_siopcb)
  *  シリアルI/Oポートへの文字送信
  */
 bool_t
-arm_primecell_uart_snd_chr(SIOPCB *p_siopcb, char_t c)
+arm_primecell_uart_snd_chr(SIOPCB *p_siopcb, char c)
 {
     if (arm_primecell_uart_putready(p_siopcb)){
         arm_primecell_uart_putchar(p_siopcb, c);
@@ -343,7 +343,7 @@ arm_primecell_uart_snd_chr(SIOPCB *p_siopcb, char_t c)
  * Put a character in polling mode
  */
 void
-arm_primecell_uart_pol_putc(ID siopid, char_t c)
+arm_primecell_uart_pol_putc(ID siopid, char c)
 {
     int index = INDEX_SIOP(siopid);
 
