@@ -160,6 +160,8 @@ ALABEL(start_6)
      *  カーネルを起動する
      */
 ALABEL(start_7)
+    ldr  r0,=vector
+    mcr  p15, 0, r0, c12, c0, 0
     ldr  r0, =start_sync
     ldr  r1, =MAGIC_START
     mov  r2, #0
@@ -182,6 +184,8 @@ ALABEL(start_8)
      */
 ALABEL(slave_wait)
     my_core_index r0
+    ldr  r1,=vector
+    mcr  p15, 0, r1, c12, c0, 0
     ldr  r1, =start_sync
 ALABEL(slave_wait_1)
     ldr  r2, =MAGIC_START

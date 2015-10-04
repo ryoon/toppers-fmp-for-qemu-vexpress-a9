@@ -51,6 +51,7 @@ STARTUP(start.o)
 PROVIDE(hardware_init_hook = 0);
 PROVIDE(software_init_hook = 0);
 PROVIDE(software_term_hook = 0);
+PROVIDE(vector = 0x60000000);
 
 SECTIONS
 {
