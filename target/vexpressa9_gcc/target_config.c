@@ -76,7 +76,7 @@ target_fput_log(char c)
 /*
  * MMU initialization (called from the chip code)
  *
- * We create a simpe 1-to-1 (physical address = virtual address) memory
+ * We create a simple 1-to-1 (physical address = virtual address) memory
  * mapping and enable caching for the DDR memory.
  *
  * Note: when not using SafeG the default world is Secure. When using
